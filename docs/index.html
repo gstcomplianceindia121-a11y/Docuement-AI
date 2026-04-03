@@ -318,6 +318,9 @@
                 <li class="nav-item" onclick="showSection('ocr_4')">
                     <i class="fas fa-microchip"></i> OCR Production (v4)
                 </li>
+                <li class="nav-item" onclick="showSection('cleaner')">
+                    <i class="fas fa-broom"></i> OCR Cleaner
+                </li>
             </ul>
         </aside>
 
@@ -350,6 +353,11 @@
                         <i class="fas fa-microchip"></i>
                         <h3>ocr_extract_4.py</h3>
                         <p style="font-size: 0.75rem; color: var(--text-dim);">Hybrid Production</p>
+                    </div>
+                    <div class="file-card" onclick="showSection('cleaner')">
+                        <i class="fas fa-broom"></i>
+                        <h3>cleaner.py</h3>
+                        <p style="font-size: 0.75rem; color: var(--text-dim);">Noise Filter & Line Merger</p>
                     </div>
                 </div>
             </div>
@@ -784,6 +792,181 @@ if __name__ == "__main__":
             json.dump(final_output, f, indent=2)
         
         print(f"\n✅ Production Pipeline Complete: Saved complex structural data to {output_file}")</code></pre>
+            </div>
+
+            <div id="cleaner" class="section">
+                <div class="code-header">
+                    <span class="code-title">cleaner.py</span>
+                    <button class="copy-btn" onclick="copyCode('code-cleaner', this)">
+                        <i class="far fa-copy"></i> Copy code
+                    </button>
+                </div>
+                <pre><code class="language-python" id="code-cleaner">import json
+from collections import defaultdict
+
+# ----------------------------
+# CONFIG
+# ----------------------------
+CONF_THRESHOLD = 0.7
+Y_THRESHOLD = 20   # line merge threshold
+
+SECTION_KEYS = [
+    "section", "borrower", "employment", "address",
+    "income", "contact", "loan", "personal"
+]
+
+# ----------------------------
+# LOAD JSON
+# ----------------------------
+def load_ocr_json(path):
+    with open(path, "r") as f:
+        return json.load(f)
+
+
+# ----------------------------
+# FILTER LOW CONFIDENCE
+# ----------------------------
+def filter_noise(data, threshold=CONF_THRESHOLD):
+    return [item for item in data if item["confidence"] >= threshold]
+
+
+# ----------------------------
+# SORT (Top → Bottom, Left → Right)
+# ----------------------------
+def sort_ocr(data):
+    return sorted(data, key=lambda x: (x["bbox"][1], x["bbox"][0]))
+
+
+# ----------------------------
+# MERGE LINES
+# ----------------------------
+def merge_lines(data, y_threshold=Y_THRESHOLD):
+    if not data:
+        return []
+
+    merged = []
+    current = data[0].copy()
+
+    for next_item in data[1:]:
+        # check vertical closeness
+        if abs(next_item["bbox"][1] - current["bbox"][3]) < y_threshold:
+            current["text"] += " " + next_item["text"]
+
+            # expand bbox
+            current["bbox"][2] = max(current["bbox"][2], next_item["bbox"][2])
+            current["bbox"][3] = next_item["bbox"][3]
+
+            # avg confidence
+            current["confidence"] = (current["confidence"] + next_item["confidence"]) / 2
+
+        else:
+            merged.append(current)
+            current = next_item.copy()
+
+    merged.append(current)
+    return merged
+
+
+# ----------------------------
+# SECTION DETECTION
+# ----------------------------
+def detect_section(text):
+    text_lower = text.lower()
+    for key in SECTION_KEYS:
+        if key in text_lower:
+            return key
+    return "general"
+
+
+# ----------------------------
+# CREATE CHUNKS
+# ----------------------------
+def create_chunks(data, page):
+    chunks = []
+    current_chunk = {
+        "page": page,
+        "section": None,
+        "text": "",
+        "items": [],
+        "confidence": []
+    }
+
+    for item in data:
+        section = detect_section(item["text"])
+
+        # new section → new chunk
+        if current_chunk["section"] != section:
+            if current_chunk["text"]:
+                chunks.append(format_chunk(current_chunk))
+
+            current_chunk = {
+                "page": page,
+                "section": section,
+                "text": item["text"],
+                "items": [item],
+                "confidence": [item["confidence"]]
+            }
+        else:
+            current_chunk["text"] += " " + item["text"]
+            current_chunk["items"].append(item)
+            current_chunk["confidence"].append(item["confidence"])
+
+    if current_chunk["text"]:
+        chunks.append(format_chunk(current_chunk))
+
+    return chunks
+
+
+# ----------------------------
+# FORMAT FINAL CHUNK
+# ----------------------------
+def format_chunk(chunk):
+    avg_conf = sum(chunk["confidence"]) / len(chunk["confidence"])
+
+    return {
+        "text": chunk["text"],
+        "metadata": {
+            "page": chunk["page"],
+            "section": chunk["section"],
+            "avg_confidence": round(avg_conf, 3),
+            "num_lines": len(chunk["items"])
+        }
+    }
+
+
+# ----------------------------
+# MAIN PIPELINE
+# ----------------------------
+def process_ocr_to_rag(input_json_path, output_path):
+    ocr_data = load_ocr_json(input_json_path)
+
+    all_chunks = []
+
+    for page_name, items in ocr_data.items():
+        page_number = int(page_name.split("_")[1].split(".")[0])
+
+        # pipeline
+        items = filter_noise(items)
+        items = sort_ocr(items)
+        items = merge_lines(items)
+
+        chunks = create_chunks(items, page_number)
+        all_chunks.extend(chunks)
+
+    # save output
+    with open(output_path, "w") as f:
+        json.dump(all_chunks, f, indent=2)
+
+    print(f"✅ RAG-ready data saved to {output_path}")
+
+
+# ----------------------------
+# RUN
+# ----------------------------
+if __name__ == "__main__":
+    process_ocr_to_rag("ocr_spatial_data.json", "rag_output.json")</code></pre>
+            </div>
+</code></pre>
             </div>
         </main>
     </div>
