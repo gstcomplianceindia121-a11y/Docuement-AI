@@ -321,6 +321,15 @@
                 <li class="nav-item" onclick="showSection('cleaner')">
                     <i class="fas fa-broom"></i> OCR Cleaner
                 </li>
+                <li class="nav-item" onclick="showSection('photos_logic')">
+                    <i class="fas fa-images"></i> Photos API Logic
+                </li>
+                <li class="nav-item" onclick="showSection('photos_app')">
+                    <i class="fas fa-server"></i> Photos Picker App
+                </li>
+                <li class="nav-item" onclick="showSection('photos_ui')">
+                    <i class="fas fa-window-maximize"></i> Photos Picker UI
+                </li>
             </ul>
         </aside>
 
@@ -358,6 +367,21 @@
                         <i class="fas fa-broom"></i>
                         <h3>cleaner.py</h3>
                         <p style="font-size: 0.75rem; color: var(--text-dim);">Noise Filter & Line Merger</p>
+                    </div>
+                    <div class="file-card" onclick="showSection('photos_logic')">
+                        <i class="fas fa-images"></i>
+                        <h3>photos.py</h3>
+                        <p style="font-size: 0.75rem; color: var(--text-dim);">Google Photos Picker API</p>
+                    </div>
+                    <div class="file-card" onclick="showSection('photos_app')">
+                        <i class="fas fa-server"></i>
+                        <h3>standalone_app.py</h3>
+                        <p style="font-size: 0.75rem; color: var(--text-dim);">FastAPI Picker Integration</p>
+                    </div>
+                    <div class="file-card" onclick="showSection('photos_ui')">
+                        <i class="fas fa-window-maximize"></i>
+                        <h3>picker.html</h3>
+                        <p style="font-size: 0.75rem; color: var(--text-dim);">Frontend Client Logic</p>
                     </div>
                 </div>
             </div>
@@ -966,7 +990,284 @@ def process_ocr_to_rag(input_json_path, output_path):
 if __name__ == "__main__":
     process_ocr_to_rag("ocr_spatial_data.json", "rag_output.json")</code></pre>
             </div>
-</code></pre>
+
+            <div id="photos_logic" class="section">
+                <div class="code-header">
+                    <span class="code-title">photos.py</span>
+                    <button class="copy-btn" onclick="copyCode('code-photos-logic', this)">
+                        <i class="far fa-copy"></i> Copy code
+                    </button>
+                </div>
+                <pre><code class="language-python" id="code-photos-logic">import requests
+import os
+import json
+from google.auth.transport.requests import Request as GoogleRequest
+from google.oauth2.credentials import Credentials
+
+API_BASE = "https://photospicker.googleapis.com/v1"
+
+def create_picker_session(creds):
+    """Creates a Google Photos Picker session and returns the session name and picker URI."""
+    headers = {
+        "Authorization": f"Bearer {creds.token}",
+        "Content-Type": "application/json"
+    }
+    # Payload must be an empty PickingSession object or omit it entirely
+    payload = {}
+    
+    response = requests.post(f"{API_BASE}/sessions", headers=headers, json=payload)
+    if response.status_code == 200:
+        return response.json(), None
+    else:
+        try:
+            error_data = response.json()
+            error_msg = error_data.get("error", {}).get("message", "Unknown error occurred")
+        except:
+            error_msg = response.text or "Unknown error"
+        return None, error_msg
+
+def check_session_status(creds, session_id):
+    """Checks if the user has finished picking photos in the session."""
+    headers = {
+        "Authorization": f"Bearer {creds.token}"
+    }
+    
+    response = requests.get(f"{API_BASE}/sessions/{session_id}", headers=headers)
+    if response.status_code == 200:
+        data = response.json()
+        # The field name is 'mediaItemsSet' (boolean)
+        return data.get("mediaItemsSet", False)
+    return False
+
+def get_picked_media_items(creds, session_id):
+    """Fetches media items picked during a session and downloads them with pagination support."""
+    headers = {
+        "Authorization": f"Bearer {creds.token}"
+    }
+    
+    # Session ID for listing is the simple ID part
+    simple_id = session_id.split('/')[-1]
+    
+    all_media_items = []
+    next_page_token = None
+    
+    while True:
+        url = f"{API_BASE}/mediaItems?sessionId={simple_id}"
+        if next_page_token:
+            url += f"&pageToken={next_page_token}"
+            
+        print(f"Fetching media items from: {url}")
+        response = requests.get(url, headers=headers)
+        
+        if response.status_code != 200:
+            print(f"Error fetching picked media items: {response.status_code} - {response.text}")
+            break
+            
+        data = response.json()
+        items = data.get("mediaItems", [])
+        all_media_items.extend(items)
+        
+        next_page_token = data.get("nextPageToken")
+        if not next_page_token:
+            break
+            
+    print(f"Total media items found: {len(all_media_items)}")
+    
+    downloaded_count = 0
+    os.makedirs("invoices", exist_ok=True)
+    
+    for item in all_media_items:
+        # Picker API structure: mediaFile object contains baseUrl, filename, and mimeType
+        media_file = item.get("mediaFile", {})
+        base_url = media_file.get("baseUrl")
+        original_filename = media_file.get("filename") or f"photo_{item.get('id', 'unknown')}"
+        
+        if base_url:
+            print(f"Downloading {original_filename}...")
+            # Append '=d' to baseUrl for original image download
+            download_url = f"{base_url}=d"
+            try:
+                # Per Docs: Requests to baseUrl MUST include Authorization header
+                img_response = requests.get(download_url, headers=headers)
+                
+                if img_response.status_code == 200:
+                    # Clean filename to avoid issues
+                    safe_filename = "".join([c for c in original_filename if c.isalnum() or c in "._- "]).strip()
+                    filepath = os.path.join("invoices", f"picker_{item.get('id', '')[:8]}_{safe_filename}")
+                    
+                    with open(filepath, "wb") as f:
+                        f.write(img_response.content)
+                    print(f"Successfully saved to {filepath}")
+                    downloaded_count += 1
+                else:
+                    print(f"Failed to download image: {img_response.status_code} - {img_response.text}")
+            except Exception as e:
+                print(f"Exception during download of {original_filename}: {e}")
+        else:
+            print(f"No baseUrl found for item {item.get('id')}")
+            
+    return downloaded_count</code></pre>
+            </div>
+
+            <div id="photos_app" class="section">
+                <div class="code-header">
+                    <span class="code-title">standalone_app.py</span>
+                    <button class="copy-btn" onclick="copyCode('code-photos-app', this)">
+                        <i class="far fa-copy"></i> Copy code
+                    </button>
+                </div>
+                <pre><code class="language-python" id="code-photos-app">import os
+import json
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+from google.oauth2.credentials import Credentials
+from google.auth.transport.requests import Request as GoogleRequest
+from dotenv import load_dotenv
+
+import os
+import sys
+# Make sure the current folder is in path to import photos logic correctly
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from photos import create_picker_session, check_session_status, get_picked_media_items
+
+# Configure standalone app
+app = FastAPI()
+templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "templates"))
+TOKEN_FILE = os.path.join(os.path.dirname(__file__), "..", "token.json")
+SCOPES = ['https://www.googleapis.com/auth/photospicker.mediaitems.readonly']
+
+@app.get("/", response_class=HTMLResponse)
+async def picker_home(request: Request):
+    """Simple UI for the standalone picker."""
+    is_authenticated = os.path.exists(TOKEN_FILE)
+    if not is_authenticated:
+        return "Please authenticate first using the main app."
+    return templates.TemplateResponse("picker.html", {"request": request})
+
+@app.post("/photos/start")
+async def photos_start_endpoint():
+    """Starts Google Photos Picker session."""
+    if not os.path.exists(TOKEN_FILE):
+        return {"error": "Authentication required"}
+    
+    creds = Credentials.from_authorized_user_file(TOKEN_FILE, SCOPES)
+    if creds.expired and creds.refresh_token:
+        creds.refresh(GoogleRequest())
+    
+    # Callback must match what's in your Google Console, using a dummy here
+    # Since the REST API doesn't use redirects, this is mostly for the session creation
+    session, error = create_picker_session(creds)
+    
+    if session and "pickerUri" in session:
+        return {
+            "status": "success", 
+            "pickerUri": session["pickerUri"],
+            "sessionId": session["id"] 
+        }
+    else:
+        return {"error": error or "Failed to create picker session"}
+
+@app.get("/photos/status/{sessionId:path}")
+async def photos_status_endpoint(sessionId: str):
+    """Checks completion status."""
+    creds = Credentials.from_authorized_user_file(TOKEN_FILE, SCOPES)
+    if creds.expired and creds.refresh_token:
+        creds.refresh(GoogleRequest())
+    
+    is_done = check_session_status(creds, sessionId)
+    return {"status": "success", "is_done": is_done}
+
+@app.post("/photos/complete/{sessionId:path}")
+async def photos_complete_endpoint(sessionId: str):
+    """Processes downloaded photos."""
+    creds = Credentials.from_authorized_user_file(TOKEN_FILE, SCOPES)
+    if creds.expired and creds.refresh_token:
+        creds.refresh(GoogleRequest())
+    
+    count = get_picked_media_items(creds, sessionId)
+    return {"status": "success", "count": count}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8001)</code></pre>
+            </div>
+
+            <div id="photos_ui" class="section">
+                <div class="code-header">
+                    <span class="code-title">picker.html</span>
+                    <button class="copy-btn" onclick="copyCode('code-photos-ui', this)">
+                        <i class="far fa-copy"></i> Copy code
+                    </button>
+                </div>
+                <pre><code class="language-html" id="code-photos-ui">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;Google Photos Picker Demo&lt;/title&gt;
+    &lt;link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&amp;display=swap" rel="stylesheet"&gt;
+    &lt;style&gt;
+        body { font-family: 'Outfit', sans-serif; background: #0f172a; color: #f8fafc; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .card { background: #1e293b; padding: 2.5rem; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); text-align: center; max-width: 400px; }
+        h1 { margin-bottom: 1rem; }
+        p { color: #94a3b8; margin-bottom: 2rem; line-height: 1.6; }
+        .btn { display: inline-flex; align-items: center; gap: 10px; background: #6366f1; color: white; padding: 1rem 1.5rem; border-radius: 12px; text-decoration: none; font-weight: 600; transition: 0.3s; border: none; cursor: pointer; }
+        .btn:hover { background: #4f46e5; transform: translateY(-2px); box-shadow: 0 10px 15px rgba(99, 102, 241, 0.4); }
+        #status { margin-top: 1.5rem; font-weight: 500; font-size: 0.9rem; }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div class="card"&gt;
+        &lt;h1&gt;Google Photos Picker&lt;/h1&gt;
+        &lt;p&gt;This is a standalone demo of how to connect and pick media using the Google Photos Picker API.&lt;/p&gt;
+        
+        &lt;button onclick="startPicker()" class="btn"&gt;
+            Pick from Google Photos
+        &lt;/button&gt;
+        
+        &lt;div id="status"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;script&gt;
+        async function startPicker() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerText = "Initializing session...";
+            
+            try {
+                const response = await fetch('/photos/start', { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.status === 'success' &amp;&amp; data.pickerUri) {
+                    const pickerUrl = data.pickerUri + '/autoclose';
+                    const sessionId = data.sessionId;
+                    
+                    window.open(pickerUrl, 'PickerPopup', 'width=600,height=700');
+                    statusDiv.innerText = "Waiting for selection in popup...";
+                    
+                    const poller = setInterval(async () =&gt; {
+                        const sResp = await fetch(`/photos/status/${sessionId}`);
+                        const sData = await sResp.json();
+                        
+                        if (sData.is_done) {
+                            clearInterval(poller);
+                            statusDiv.innerText = "Downloading items...";
+                            const cResp = await fetch(`/photos/complete/${sessionId}`, { method: 'POST' });
+                            const cData = await cResp.json();
+                            alert(`Successfully picked and downloaded ${cData.count} items!`);
+                            statusDiv.innerText = "All items downloaded successfully.";
+                        }
+                    }, 3000);
+                } else {
+                    statusDiv.innerText = "Error: " + (data.error || "Unknown error");
+                }
+            } catch (e) {
+                statusDiv.innerText = "Connection error: " + e.message;
+            }
+        }
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
             </div>
         </main>
     </div>
