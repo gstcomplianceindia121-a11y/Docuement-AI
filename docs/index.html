@@ -2,1312 +2,443 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invoice Analyzer | AI Document Pipeline</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <title>Agentic Reference | Drive Syncing Module</title>
+    <!-- Modern Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Prism Syntax Highlighting Theme -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
-
         :root {
-            --bg-main: #020617;
-            --bg-card: #0f172a;
-            --bg-card-hover: #1e293b;
-            --accent: #38bdf8;
-            --accent-glow: rgba(56, 189, 248, 0.2);
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --text-dim: #64748b;
-            --border: rgba(255, 255, 255, 0.1);
-            --radius: 12px;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg-color: #0f172a;
+            --sidebar-bg: rgba(30, 41, 59, 0.7);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --code-bg: #0b1121;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-main);
-            color: var(--text-primary);
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-
-        .dashboard {
-            display: grid;
-            grid-template-columns: 280px 1fr;
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.1) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            display: flex;
             height: 100vh;
+            overflow: hidden;
         }
 
-        /* Sidebar */
+        /* Sidebar Styling */
         .sidebar {
-            background: var(--bg-card);
-            border-right: 1px solid var(--border);
-            padding: 2rem;
+            width: 280px;
+            background: var(--sidebar-bg);
+            backdrop-filter: blur(12px);
+            border-right: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
-            gap: 2rem;
+            padding: 2rem 1rem;
+            z-index: 10;
         }
 
-        .logo {
+        .brand {
             display: flex;
             align-items: center;
             gap: 12px;
-            font-weight: 700;
-            font-size: 1.25rem;
-            color: var(--accent);
+            font-weight: 800;
+            font-size: 1.2rem;
+            margin-bottom: 2.5rem;
+            padding: 0 10px;
+            color: #fff;
         }
 
-        .nav-links {
-            list-style: none;
+        .brand i {
+            color: var(--primary);
+            font-size: 1.4rem;
+        }
+
+        .sidebar-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding: 0 10px;
+        }
+
+        .sidebar-item {
             display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .nav-item {
-            padding: 12px 16px;
-            border-radius: 8px;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: 12px;
             cursor: pointer;
-            transition: 0.2s;
-            color: var(--text-secondary);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .nav-item.active {
-            background: var(--bg-card-hover);
-            color: var(--accent);
-            box-shadow: 0 0 15px var(--accent-glow);
-        }
-
-        .nav-item:hover {
-            background: var(--bg-card-hover);
-            color: var(--text-primary);
-        }
-
-        /* Main Content Area */
-        .content {
-            padding: 2rem;
-            overflow-y: auto;
-            position: relative;
-        }
-
-        .hero {
-            border-radius: 20px;
-            background: linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(2, 6, 23, 0.8) 100%), 
-                        url('./ai_invoice_hero.png');
-            background-size: cover;
-            background-position: center;
-            height: 300px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 0 3rem;
-            margin-bottom: 2rem;
-            border: 1px solid var(--border);
+            color: var(--text-muted);
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-bottom: 0.5rem;
             position: relative;
             overflow: hidden;
         }
 
-        .hero h1 {
-            font-size: 3rem;
-            font-weight: 800;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(to right, #fff, var(--accent));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .sidebar-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
         }
 
-        .hero p {
-            color: var(--text-secondary);
-            font-size: 1.1rem;
-            max-width: 600px;
+        .sidebar-item.active {
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--primary);
+            border: 1px solid rgba(99, 102, 241, 0.3);
         }
 
-        /* Project Structure & Files */
-        .file-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-top: 2rem;
-        }
-
-        .file-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            padding: 1.5rem;
-            border-radius: var(--radius);
-            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
-            text-align: center;
-        }
-
-        .file-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--accent);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-        }
-
-        .file-card i {
-            font-size: 2rem;
-            color: var(--accent);
-            margin-bottom: 1rem;
-            display: block;
-        }
-
-        .file-card h3 {
-            font-size: 0.9rem;
-            font-weight: 600;
-        }
-
-        /* Code Header & Sections */
-        .code-header {
-            background: #1e293b;
-            padding: 10px 20px;
-            border-top-left-radius: 8px;
-            border-top-right-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .code-title {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.9rem;
-            color: var(--accent);
-        }
-
-        .section { display: none; }
-        .section.active { display: block; }
-        
-        pre { 
-            background: #0f172a !important;
-            border-bottom-left-radius: 8px;
-            border-bottom-right-radius: 8px;
-            margin: 0 !important;
-            max-height: 75vh !important; 
+        /* Main Content Area */
+        .content {
+            flex: 1;
+            padding: 3rem 4rem;
             overflow-y: auto;
-            position: relative; 
-        }
-
-        code[class*="language-"] {
-            font-family: 'JetBrains Mono', monospace !important;
-            font-size: 0.85rem !important;
-        }
-
-        .copy-btn {
-            background: rgba(56, 189, 248, 0.1);
-            border: 1px solid var(--border);
-            color: var(--accent);
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            cursor: pointer;
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-family: 'Inter', sans-serif;
-        }
-        
-        .copy-btn:hover {
-            background: var(--accent);
-            color: var(--bg-main);
-            box-shadow: 0 0 10px var(--accent);
-        }
-
-        /* Pipeline Demo Visualization */
-        .pipeline-section {
-            margin-top: 4rem;
-            padding: 3rem;
-            background: rgba(15, 23, 42, 0.5);
-            border-radius: 20px;
-            border: 1px dashed var(--border);
-        }
-
-        .pipeline-steps {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 1000px;
-            margin: 0 auto;
             position: relative;
         }
 
-        .pipeline-step {
-            text-align: center;
-            flex: 1;
-            z-index: 2;
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+
+        .file-content {
+            display: none;
+            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+            transform: translateY(20px);
+            max-width: 1000px;
+            margin: 0 auto;
         }
 
-        .step-icon {
-            width: 60px;
-            height: 60px;
-            background: var(--bg-card);
-            border: 2px solid var(--accent);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 15px;
-            font-weight: 700;
-            transition: 0.3s;
+        .file-content.active {
+            display: block;
         }
 
-        .pipeline-step:hover .step-icon {
-            background: var(--accent);
-            color: var(--bg-main);
-            box-shadow: 0 0 20px var(--accent);
-        }
-
-        .pipeline-connector {
-            position: absolute;
-            top: 30px;
-            left: 10%;
-            right: 10%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--accent), transparent);
-            z-index: 1;
-        }
-
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
+        @keyframes slideUp {
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .animate-fade {
-            animation: fadeIn 0.8s ease-out forwards;
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1.5rem;
         }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: var(--bg-main); }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--accent-glow); }
+        .header-text h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-text p {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            line-height: 1.5;
+            max-width: 600px;
+        }
+
+        /* Code Block Styling */
+        .code-container {
+            position: relative;
+            background: var(--code-bg);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .mac-dots {
+            display: flex;
+            gap: 8px;
+        }
+
+        .mac-dot {
+            width: 12px; height: 12px; border-radius: 50%;
+        }
+        .mac-dot.red { background: #ff5f56; }
+        .mac-dot.yellow { background: #ffbd2e; }
+        .mac-dot.green { background: #27c93f; }
+
+        pre[class*="language-"] {
+            margin: 0 !important;
+            padding: 2rem !important;
+            background: transparent !important;
+            font-size: 0.95rem;
+            border-radius: 0 0 16px 16px;
+        }
+
+        .copy-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .copy-btn.copied {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
     </style>
 </head>
 <body>
-    <div class="dashboard">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="logo">
-                <i class="fas fa-file-invoice"></i>
-                <span>InvoiceAI</span>
-            </div>
-            <ul class="nav-links">
-                <li class="nav-item active" onclick="showSection('overview')">
-                    <i class="fas fa-home"></i> Overview
-                </li>
-                <li class="nav-item" onclick="showSection('pdf_to_image_1')">
-                    <i class="fas fa-file-pdf"></i> PDF Converter (v1)
-                </li>
-                <li class="nav-item" onclick="showSection('ocr_1')">
-                    <i class="fas fa-eye"></i> OCR Phase 1
-                </li>
-                <li class="nav-item" onclick="showSection('ocr_2')">
-                    <i class="fas fa-table"></i> OCR Phase 2
-                </li>
-                <li class="nav-item" onclick="showSection('ocr_4')">
-                    <i class="fas fa-microchip"></i> OCR Production (v4)
-                </li>
-                <li class="nav-item" onclick="showSection('cleaner')">
-                    <i class="fas fa-broom"></i> OCR Cleaner
-                </li>
-                <li class="nav-item" onclick="showSection('photos_logic')">
-                    <i class="fas fa-images"></i> Photos API Logic
-                </li>
-                <li class="nav-item" onclick="showSection('photos_app')">
-                    <i class="fas fa-server"></i> Photos Picker App
-                </li>
-                <li class="nav-item" onclick="showSection('photos_ui')">
-                    <i class="fas fa-window-maximize"></i> Photos Picker UI
-                </li>
-            </ul>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="content">
-            <!-- Overview Section -->
-            <div id="overview" class="section active animate-fade">
-                <div class="hero">
-                    <h1>Invoice Analyzer ML</h1>
-                    <p>Modern end-to-end document extraction pipeline showing the evolution of OCR accuracy and structural analysis.</p>
-                </div>
-                <h2 style="margin-bottom: 1.5rem;">Source Code Repository</h2>
-                <div class="file-grid">
-                    <div class="file-card" onclick="showSection('pdf_to_image_1')">
-                        <i class="fas fa-file-code"></i>
-                        <h3>pdf_to_image_1.py</h3>
-                        <p style="font-size: 0.75rem; color: var(--text-dim);">PyMuPDF (Fitz)</p>
-                    </div>
-                    <div class="file-card" onclick="showSection('ocr_1')">
-                        <i class="fas fa-eye"></i>
-                        <h3>ocr_extract_1.py</h3>
-                        <p style="font-size: 0.75rem; color: var(--text-dim);">Spatial JSON</p>
-                    </div>
-                    <div class="file-card" onclick="showSection('ocr_2')">
-                        <i class="fas fa-table"></i>
-                        <h3>ocr_extract_2.py</h3>
-                        <p style="font-size: 0.75rem; color: var(--text-dim);">Markdown Layout</p>
-                    </div>
-                    <div class="file-card" onclick="showSection('ocr_4')">
-                        <i class="fas fa-microchip"></i>
-                        <h3>ocr_extract_4.py</h3>
-                        <p style="font-size: 0.75rem; color: var(--text-dim);">Hybrid Production</p>
-                    </div>
-                    <div class="file-card" onclick="showSection('cleaner')">
-                        <i class="fas fa-broom"></i>
-                        <h3>cleaner.py</h3>
-                        <p style="font-size: 0.75rem; color: var(--text-dim);">Noise Filter & Line Merger</p>
-                    </div>
-                    <div class="file-card" onclick="showSection('photos_logic')">
-                        <i class="fas fa-images"></i>
-                        <h3>photos.py</h3>
-                        <p style="font-size: 0.75rem; color: var(--text-dim);">Google Photos Picker API</p>
-                    </div>
-                    <div class="file-card" onclick="showSection('photos_app')">
-                        <i class="fas fa-server"></i>
-                        <h3>standalone_app.py</h3>
-                        <p style="font-size: 0.75rem; color: var(--text-dim);">FastAPI Picker Integration</p>
-                    </div>
-                    <div class="file-card" onclick="showSection('photos_ui')">
-                        <i class="fas fa-window-maximize"></i>
-                        <h3>picker.html</h3>
-                        <p style="font-size: 0.75rem; color: var(--text-dim);">Frontend Client Logic</p>
-                    </div>
+    
+    <!-- Sidebar / Explorer Menu -->
+    <div class="sidebar">
+        <div class="brand">
+            <i class="fas fa-layer-group"></i>
+            Agentic Modules
+        </div>
+        
+        <div class="sidebar-title">Core Implementation</div>
+        
+        <div class="sidebar-item active" onclick="showFile('drive_html', this)">
+            <i class="fab fa-html5" style="color: #e34c26; font-size: 1.2rem;"></i>
+            drive.html
+        </div>
+        
+        <div class="sidebar-item" onclick="showFile('app_py', this)">
+            <i class="fab fa-python" style="color: #3572A5; font-size: 1.2rem;"></i>
+            app.py
+        </div>
+    </div>
+    
+    <!-- Code Viewing Area -->
+    <div class="content">
+        
+        <!-- DRIVE.HTML CONTENT -->
+        <div id="drive_html" class="file-content active">
+            <div class="header-row">
+                <div class="header-text">
+                    <h2><i class="fab fa-html5" style="color: #e34c26;"></i> drive.html <span style="font-size: 0.9rem; background: rgba(227, 76, 38, 0.1); padding: 4px 8px; border-radius: 6px; font-weight: 600; vertical-align: middle;">Frontend</span></h2>
+                    <p>Minimal, unstyled HTML bridge logic to capture and transmit the scheduling timeline back to the background agent.</p>
                 </div>
             </div>
-
-            <!-- Sections for each file -->
-            <div id="pdf_to_image_1" class="section">
+            
+            <div class="code-container">
                 <div class="code-header">
-                    <span class="code-title">pdf_to_image_1.py</span>
-                    <button class="copy-btn" onclick="copyCode('code-pdf', this)">
-                        <i class="far fa-copy"></i> Copy code
+                    <div class="mac-dots">
+                        <div class="mac-dot red"></div>
+                        <div class="mac-dot yellow"></div>
+                        <div class="mac-dot green"></div>
+                    </div>
+                    <button class="copy-btn" onclick="copyCode('code_drive_html', this)">
+                        <i class="far fa-copy"></i> Copy Source
                     </button>
                 </div>
-                <pre><code class="language-python" id="code-pdf">import fitz  # PyMuPDF
-import os
+<pre><code id="code_drive_html" class="language-html">&lt;!-- 1. Barebones User Interface Elements --&gt;
+&lt;div&gt;
+    &lt;label&gt;Select Drive Folder: &lt;/label&gt;
+    &lt;select id="drive-folder"&gt;&lt;/select&gt;
 
-def pdf_to_images(pdf_path, output_dir="images", dpi=300):
-    """
-    Converts PDF to images using PyMuPDF (Fitz).
-    Yields image paths.
-    """
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+    &lt;label&gt;Fetch Interval (Minutes): &lt;/label&gt;
+    &lt;input type="number" id="drive-interval" value="60"&gt;
 
-    doc = fitz.open(pdf_path)
-    image_paths = []
+    &lt;button onclick="saveDriveSettings()"&gt;Start Sync&lt;/button&gt;
+&lt;/div&gt;
 
-    for page_num in range(len(doc)):
-        page = doc.load_page(page_num)
+&lt;!-- 2. Connection Logic --&gt;
+&lt;script&gt;
+    // Step A: Request Google Drive folders from Backend to populate options
+    async function loadDriveFolders() {
+        const response = await fetch('/drive/folders');
+        const data = await response.json();
         
-        # Matrix for scaling (DPI / 72 is the scale factor since default is 72)
-        zoom = dpi / 72 
-        mat = fitz.Matrix(zoom, zoom)
+        const select = document.getElementById('drive-folder');
+        select.innerHTML = ''; 
         
-        pix = page.get_pixmap(matrix=mat)
-        img_path = os.path.join(output_dir, f"page_{page_num + 1}.png")
-        pix.save(img_path)
-        image_paths.append(img_path)
-
-    doc.close()
-    return image_paths
-
-if __name__ == "__main__":
-    # Test
-    pdf_file = "scan-loan.pdf"
-    if os.path.exists(pdf_file):
-        imgs = pdf_to_images(pdf_file)
-        print(f"Generated {len(imgs)} images using PyMuPDF: {imgs}")
-    else:
-        print(f"File {pdf_file} not found.")</code></pre>
-            </div>
-
-            <div id="ocr_1" class="section">
-                <div class="code-header">
-                    <span class="code-title">ocr_extract_1.py</span>
-                    <button class="copy-btn" onclick="copyCode('code-ocr1', this)">
-                        <i class="far fa-copy"></i> Copy code
-                    </button>
-                </div>
-                <pre><code class="language-python" id="code-ocr1">import os
-os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
-from paddleocr import PaddleOCR
-import os
-import json
-from PIL import Image
-import numpy as np
-import cv2
-import matplotlib.pyplot as plt
-
-# Initialize PaddleOCR
-ocr = PaddleOCR(use_angle_cls=True, lang='en')
-
-def load_image(path):
-    img = Image.open(path)
-    img = img.convert("RGB")
-    return np.array(img)
-
-def visualize_ocr(img, blocks):
-    """Shows the bounding boxes plotted over the original image."""
-    plt.figure(figsize=(12, 16))
-    plt.imshow(img)
-    
-    for b in blocks:
-        x1, y1, x2, y2 = b["bbox"]
-        
-        plt.gca().add_patch(
-            plt.Rectangle(
-                (x1, y1),
-                x2 - x1,
-                y2 - y1,
-                fill=False,
-                edgecolor="red",
-                linewidth=1
-            )
-        )
-    
-    plt.axis("off")
-    plt.title("OCR Bounding Boxes (JSON Mode)")
-    plt.show()
-
-def run_ocr_json(image_path):
-    """
-    Implementation of Recommendation 1: Spatial JSON Payload.
-    Preserves text and bounding box coordinates for the LLM.
-    """
-    img = load_image(image_path)
-    result = ocr.ocr(img, cls=True)
-
-    ocr_payload = []
-
-    if result and result[0]:
-        for line in result[0]:
-            bbox = line[0]              # [[x1,y1],[x2,y2],[x3,y3],[x4,y4]]
-            text = line[1][0]
-            conf = float(line[1][1])
-
-            # Simplify bbox to [x_min, y_min, x_max, y_max]
-            xs = [p[0] for p in bbox]
-            ys = [p[1] for p in bbox]
-            
-            ocr_payload.append({
-                "text": text,
-                "bbox": [min(xs), min(ys), max(xs), max(ys)],
-                "confidence": round(conf, 4)
-            })
-
-    return ocr_payload, img
-
-if __name__ == "__main__":
-    photos_dir = "../images"
-    all_pages_data = {}
-
-    if not os.path.exists(photos_dir):
-        print(f"Error: {photos_dir} directory not found.")
-    else:
-        image_files = sorted([f for f in os.listdir(photos_dir) if f.endswith(".png")])
-        
-        for img_name in image_files:
-            print(f"[INFO] Processing {img_name}...")
-            image_path = os.path.join(photos_dir, img_name)
-            
-            page_data, img_np = run_ocr_json(image_path)
-            all_pages_data[img_name] = page_data
-            
-            # SHOW FIG
-            visualize_ocr(img_np, page_data)
-
-        # Save as JSON for Recommendation 1
-        output_file = "ocr_spatial_data.json"
-        with open(output_file, "w", encoding="utf-8") as f:
-            json.dump(all_pages_data, f, indent=2)
-        
-        print(f"\n✅ Recommendation 1 Complete: Saved spatial data to {output_file}")
-        print("💡 Hint: Pass this JSON directly to your LLM payload.")</code></pre>
-            </div>
-
-            <div id="ocr_2" class="section">
-                <div class="code-header">
-                    <span class="code-title">ocr_extract_2.py</span>
-                    <button class="copy-btn" onclick="copyCode('code-ocr2', this)">
-                        <i class="far fa-copy"></i> Copy code
-                    </button>
-                </div>
-                <pre><code class="language-python" id="code-ocr2">from paddleocr import PaddleOCR
-import os
-from PIL import Image
-import numpy as np
-import matplotlib.pyplot as plt
-
-# Initialize PaddleOCR
-ocr = PaddleOCR(use_angle_cls=True, lang='en')
-
-def load_image(path):
-    img = Image.open(path)
-    img = img.convert("RGB")
-    return np.array(img)
-
-def visualize_ocr(img, blocks):
-    """Shows the bounding boxes plotted over the original image."""
-    plt.figure(figsize=(12, 16))
-    plt.imshow(img)
-    
-    for b in blocks:
-        x1, y1 = b["x_min"], b["y_min"]
-        x2, y2 = b["x_max"], b["y_max"]
-        
-        plt.gca().add_patch(
-            plt.Rectangle(
-                (x1, y1),
-                x2 - x1,
-                y2 - y1,
-                fill=False,
-                edgecolor="green",
-                linewidth=1
-            )
-        )
-    
-    plt.axis("off")
-    plt.title("OCR Bounding Boxes (Markdown Mode)")
-    plt.show()
-
-def group_into_lines(ocr_data, row_threshold=15):
-    """
-    Groups OCR blocks into virtual 'lines' based on their Y-coordinate.
-    Implementation of Recommendation 2: Markdown/Layout Reconstruction.
-    """
-    ocr_data = sorted(ocr_data, key=lambda x: x["y_min"])
-    
-    lines = []
-    for item in ocr_data:
-        placed = False
-        item_y = item["y_min"]
-        
-        for line in lines:
-            line_y = line[0]["y_min"]
-            if abs(item_y - line_y) < row_threshold:
-                line.append(item)
-                placed = True
-                break
-        
-        if not placed:
-            lines.append([item])
-    
-    reconstructed_text = []
-    for line in lines:
-        row_sorted = sorted(line, key=lambda x: x["x_min"])
-        row_content = "   |   ".join(c["text"] for c in row_sorted)
-        reconstructed_text.append(f"| {row_content} |")
-
-    return "\n".join(reconstructed_text)
-
-def run_ocr_markdown(image_path):
-    img = load_image(image_path)
-    result = ocr.ocr(img, cls=True)
-
-    ocr_blocks = []
-    if result and result[0]:
-        for line in result[0]:
-            bbox = line[0]
-            text = line[1][0]
-            
-            xs = [p[0] for p in bbox]
-            ys = [p[1] for p in bbox]
-            
-            ocr_blocks.append({
-                "text": text,
-                "x_min": min(xs),
-                "y_min": min(ys),
-                "x_max": max(xs),
-                "y_max": max(ys)
-            })
-
-    markdown_layout = group_into_lines(ocr_blocks)
-    return markdown_layout, ocr_blocks, img
-
-if __name__ == "__main__":
-    photos_dir = "Photos"
-    all_pages_markdown = []
-
-    if not os.path.exists(photos_dir):
-        print(f"Error: {photos_dir} directory not found.")
-    else:
-        image_files = sorted([f for f in os.listdir(photos_dir) if f.endswith(".png")])
-        
-        for img_name in image_files:
-            print(f"[INFO] Reconstructing layout for {img_name}...")
-            image_path = os.path.join(photos_dir, img_name)
-            
-            reconstruction, blocks, img_np = run_ocr_markdown(image_path)
-            
-            # SHOW FIG
-            visualize_ocr(img_np, blocks)
-            
-            page_header = f"### PAGE: {img_name}\n"
-            all_pages_markdown.append(page_header + reconstruction)
-
-        # Output to file
-        output_file = "ocr_layout_reconstructed.md"
-        with open(output_file, "w", encoding="utf-8") as f:
-            f.write("\n\n---\n\n".join(all_pages_markdown))
-        
-        print(f"\n✅ Recommendation 2 Complete: Reconstructed layout saved to {output_file}")
-        print("💡 Hint: This Markdown allows the LLM to 'see' the table structure.")</code></pre>
-            </div>
-
-            <div id="ocr_4" class="section">
-                <div class="code-header">
-                    <span class="code-title">ocr_extract_4.py</span>
-                    <button class="copy-btn" onclick="copyCode('code-ocr4', this)">
-                        <i class="far fa-copy"></i> Copy code
-                    </button>
-                </div>
-                <pre><code class="language-python" id="code-ocr4">from paddleocr import PPStructure, PaddleOCR
-import os
-import cv2
-import numpy as np
-import matplotlib.pyplot as plt
-from PIL import Image
-import json
-
-# Initialize BOTH engines for a Hybrid Approach
-# 1. Standard OCR (Best for finding every word, including the name)
-ocr_standard = PaddleOCR(use_angle_cls=True, lang='en', show_log=False)
-# 2. Structural Engine (Best for tables and headers)
-layout_engine = PPStructure(table=True, ocr=True, layout=True, show_log=False)
-
-def load_image(path):
-    img = cv2.imread(path)
-    return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
-def detect_checkboxes_opencv(img_gray, all_text_bboxes):
-    """
-    Fixed detector: Uses a combined mask from BOTH engines.
-    """
-    mask = np.zeros_like(img_gray)
-    for bbox in all_text_bboxes:
-        x1, y1, x2, y2 = [int(v) for v in bbox]
-        cv2.rectangle(mask, (x1-5, y1-5), (x2+5, y2+5), 255, -1)
-
-    _, binary = cv2.threshold(img_gray, 200, 255, cv2.THRESH_BINARY_INV)
-    binary[mask == 255] = 0 # Wipe out all detected text before finding checkboxes
-
-    contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    
-    checkboxes = []
-    for cnt in contours:
-        x, y, w, h = cv2.boundingRect(cnt)
-        aspect_ratio = float(w)/h
-        if 16 < w < 40 and 16 < h < 40 and 0.8 < aspect_ratio < 1.2:
-            roi = binary[y:y+h, x:x+w]
-            density = cv2.countNonZero(roi) / (w * h)
-            checkboxes.append({
-                "type": "checkbox",
-                "bbox": [float(x), float(y), float(x+w), float(y+h)],
-                "is_checked": bool(density > 0.25)
-            })
-    return checkboxes
-
-def run_production_ocr(image_path):
-    img = load_image(image_path)
-    img_gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-    
-    # STEP 1: Run Standard OCR to ensure we get the Name (and all other text)
-    standard_res = ocr_standard.ocr(img)
-    
-    # STEP 2: Run Layout Engine for Tables
-    structure_res = layout_engine(img)
-    
-    final_blocks = []
-    all_text_bboxes = []
-
-    # Process Standard OCR results first (High reliability for text)
-    if standard_res and standard_res[0]:
-        for line in standard_res[0]:
-            bbox_raw = line[0] # [[x1,y1],[x2,y2],[x3,y3],[x4,y4]]
-            text = line[1][0]
-            conf = float(line[1][1])
-            xs, ys = [p[0] for p in bbox_raw], [p[1] for p in bbox_raw]
-            bbox = [min(xs), min(ys), max(xs), max(ys)]
-            
-            final_blocks.append({
-                "type": "text",
-                "text": text,
-                "confidence": conf,
-                "bbox": bbox
-            })
-            all_text_bboxes.append(bbox)
-
-    # Process Layout Engine for Tables only (Structure)
-    for block in structure_res:
-        if block["type"] == "table":
-            bbox = [float(c) for c in block["bbox"]]
-            final_blocks.append({
-                "type": "table",
-                "bbox": bbox,
-                "html": block["res"].get("html", "")
-            })
-            all_text_bboxes.append(bbox)
-                
-    # STEP 3: Detect Checkboxes (using the mask from all detected text)
-    checkboxes = detect_checkboxes_opencv(img_gray, all_text_bboxes)
-    final_blocks.extend(checkboxes)
-    
-    return final_blocks, img
-
-def visualize_production(img, blocks):
-    plt.figure(figsize=(12, 16))
-    plt.imshow(img)
-    
-    for b in blocks:
-        if b["type"] == "checkbox":
-            color = "blue" if b["is_checked"] else "gray"
-        elif b["type"] == "table":
-            color = "red"
-        else:
-            color = "orange" if b.get("manual_review") else "green"
-            
-        bbox = b["bbox"]
-        if len(bbox) == 4:
-            x1, y1, x2, y2 = bbox
-        else: # flattened polygon
-            x1, y1, x2, y2 = bbox[0], bbox[1], bbox[4], bbox[5]
-
-        plt.gca().add_patch(plt.Rectangle((x1, y1), x2-x1, y2-y1, fill=False, edgecolor=color, linewidth=1))
-
-    plt.axis("off")
-    plt.title("Production Pipeline (Red=Table, Green=Text, Blue=Checked, Gray=Empty, Orange=Review)")
-    plt.show()
-
-if __name__ == "__main__":
-    photos_dir = "Photos"
-    final_output = {}
-
-    if not os.path.exists(photos_dir):
-        print(f"Error: {photos_dir} directory not found.")
-    else:
-        # Sort and process page-by-page
-        image_files = sorted([f for f in os.listdir(photos_dir) if f.endswith(".png")])
-        
-        for img_name in image_files:
-            print(f"[INFO] Running Structural Analysis on {img_name}...")
-            image_path = os.path.join(photos_dir, img_name)
-            
-            blocks, img_np = run_production_ocr(image_path)
-            final_output[img_name] = blocks
-            
-            # Interactive visualization
-            visualize_production(img_np, blocks)
-
-        # High-Fidelity JSON Output
-        output_file = "ocr_production_data.json"
-        with open(output_file, "w", encoding="utf-8") as f:
-            json.dump(final_output, f, indent=2)
-        
-        print(f"\n✅ Production Pipeline Complete: Saved complex structural data to {output_file}")</code></pre>
-            </div>
-
-            <div id="cleaner" class="section">
-                <div class="code-header">
-                    <span class="code-title">cleaner.py</span>
-                    <button class="copy-btn" onclick="copyCode('code-cleaner', this)">
-                        <i class="far fa-copy"></i> Copy code
-                    </button>
-                </div>
-                <pre><code class="language-python" id="code-cleaner">import json
-from collections import defaultdict
-
-# ----------------------------
-# CONFIG
-# ----------------------------
-CONF_THRESHOLD = 0.7
-Y_THRESHOLD = 20   # line merge threshold
-
-SECTION_KEYS = [
-    "section", "borrower", "employment", "address",
-    "income", "contact", "loan", "personal"
-]
-
-# ----------------------------
-# LOAD JSON
-# ----------------------------
-def load_ocr_json(path):
-    with open(path, "r") as f:
-        return json.load(f)
-
-
-# ----------------------------
-# FILTER LOW CONFIDENCE
-# ----------------------------
-def filter_noise(data, threshold=CONF_THRESHOLD):
-    return [item for item in data if item["confidence"] >= threshold]
-
-
-# ----------------------------
-# SORT (Top → Bottom, Left → Right)
-# ----------------------------
-def sort_ocr(data):
-    return sorted(data, key=lambda x: (x["bbox"][1], x["bbox"][0]))
-
-
-# ----------------------------
-# MERGE LINES
-# ----------------------------
-def merge_lines(data, y_threshold=Y_THRESHOLD):
-    if not data:
-        return []
-
-    merged = []
-    current = data[0].copy()
-
-    for next_item in data[1:]:
-        # check vertical closeness
-        if abs(next_item["bbox"][1] - current["bbox"][3]) < y_threshold:
-            current["text"] += " " + next_item["text"]
-
-            # expand bbox
-            current["bbox"][2] = max(current["bbox"][2], next_item["bbox"][2])
-            current["bbox"][3] = next_item["bbox"][3]
-
-            # avg confidence
-            current["confidence"] = (current["confidence"] + next_item["confidence"]) / 2
-
-        else:
-            merged.append(current)
-            current = next_item.copy()
-
-    merged.append(current)
-    return merged
-
-
-# ----------------------------
-# SECTION DETECTION
-# ----------------------------
-def detect_section(text):
-    text_lower = text.lower()
-    for key in SECTION_KEYS:
-        if key in text_lower:
-            return key
-    return "general"
-
-
-# ----------------------------
-# CREATE CHUNKS
-# ----------------------------
-def create_chunks(data, page):
-    chunks = []
-    current_chunk = {
-        "page": page,
-        "section": None,
-        "text": "",
-        "items": [],
-        "confidence": []
+        data.folders.forEach(folder =&gt; {
+            select.innerHTML += `&lt;option value="${folder.id}"&gt;${folder.name}&lt;/option&gt;`;
+        });
     }
 
-    for item in data:
-        section = detect_section(item["text"])
+    // Step B: Bundle Interval Timer + Target ID and POST to Backend Configuration
+    async function saveDriveSettings() {
+        const payload = {
+            folder_id: document.getElementById('drive-folder').value,
+            interval_minutes: document.getElementById('drive-interval').value
+        };
 
-        # new section → new chunk
-        if current_chunk["section"] != section:
-            if current_chunk["text"]:
-                chunks.append(format_chunk(current_chunk))
-
-            current_chunk = {
-                "page": page,
-                "section": section,
-                "text": item["text"],
-                "items": [item],
-                "confidence": [item["confidence"]]
-            }
-        else:
-            current_chunk["text"] += " " + item["text"]
-            current_chunk["items"].append(item)
-            current_chunk["confidence"].append(item["confidence"])
-
-    if current_chunk["text"]:
-        chunks.append(format_chunk(current_chunk))
-
-    return chunks
-
-
-# ----------------------------
-# FORMAT FINAL CHUNK
-# ----------------------------
-def format_chunk(chunk):
-    avg_conf = sum(chunk["confidence"]) / len(chunk["confidence"])
-
-    return {
-        "text": chunk["text"],
-        "metadata": {
-            "page": chunk["page"],
-            "section": chunk["section"],
-            "avg_confidence": round(avg_conf, 3),
-            "num_lines": len(chunk["items"])
+        const response = await fetch('/drive/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        
+        const data = await response.json();
+        if (data.status === 'success') {
+            alert('Automation Saved! Fetching begins in the background.');
         }
     }
 
-
-# ----------------------------
-# MAIN PIPELINE
-# ----------------------------
-def process_ocr_to_rag(input_json_path, output_path):
-    ocr_data = load_ocr_json(input_json_path)
-
-    all_chunks = []
-
-    for page_name, items in ocr_data.items():
-        page_number = int(page_name.split("_")[1].split(".")[0])
-
-        # pipeline
-        items = filter_noise(items)
-        items = sort_ocr(items)
-        items = merge_lines(items)
-
-        chunks = create_chunks(items, page_number)
-        all_chunks.extend(chunks)
-
-    # save output
-    with open(output_path, "w") as f:
-        json.dump(all_chunks, f, indent=2)
-
-    print(f"✅ RAG-ready data saved to {output_path}")
-
-
-# ----------------------------
-# RUN
-# ----------------------------
-if __name__ == "__main__":
-    process_ocr_to_rag("ocr_spatial_data.json", "rag_output.json")</code></pre>
+    // Auto-trigger folder extraction instantly on page load
+    window.addEventListener('load', loadDriveFolders);
+&lt;/script&gt;</code></pre>
             </div>
+        </div>
 
-            <div id="photos_logic" class="section">
+        <!-- APP.PY CONTENT -->
+        <div id="app_py" class="file-content">
+            <div class="header-row">
+                <div class="header-text">
+                    <h2><i class="fab fa-python" style="color: #3572A5;"></i> app.py <span style="font-size: 0.9rem; background: rgba(53, 114, 165, 0.1); padding: 4px 8px; border-radius: 6px; font-weight: 600; vertical-align: middle;">Backend</span></h2>
+                    <p>The core structural backbone demonstrating how FastAPI sustains non-blocking infinite interval polling without breaking HTTP streams.</p>
+                </div>
+            </div>
+            
+            <div class="code-container">
                 <div class="code-header">
-                    <span class="code-title">photos.py</span>
-                    <button class="copy-btn" onclick="copyCode('code-photos-logic', this)">
-                        <i class="far fa-copy"></i> Copy code
+                    <div class="mac-dots">
+                        <div class="mac-dot red"></div>
+                        <div class="mac-dot yellow"></div>
+                        <div class="mac-dot green"></div>
+                    </div>
+                    <button class="copy-btn" onclick="copyCode('code_app_py', this)">
+                        <i class="far fa-copy"></i> Copy Source
                     </button>
                 </div>
-                <pre><code class="language-python" id="code-photos-logic">import requests
-import os
-import json
-from google.auth.transport.requests import Request as GoogleRequest
-from google.oauth2.credentials import Credentials
-
-API_BASE = "https://photospicker.googleapis.com/v1"
-
-def create_picker_session(creds):
-    """Creates a Google Photos Picker session and returns the session name and picker URI."""
-    headers = {
-        "Authorization": f"Bearer {creds.token}",
-        "Content-Type": "application/json"
-    }
-    # Payload must be an empty PickingSession object or omit it entirely
-    payload = {}
-    
-    response = requests.post(f"{API_BASE}/sessions", headers=headers, json=payload)
-    if response.status_code == 200:
-        return response.json(), None
-    else:
-        try:
-            error_data = response.json()
-            error_msg = error_data.get("error", {}).get("message", "Unknown error occurred")
-        except:
-            error_msg = response.text or "Unknown error"
-        return None, error_msg
-
-def check_session_status(creds, session_id):
-    """Checks if the user has finished picking photos in the session."""
-    headers = {
-        "Authorization": f"Bearer {creds.token}"
-    }
-    
-    response = requests.get(f"{API_BASE}/sessions/{session_id}", headers=headers)
-    if response.status_code == 200:
-        data = response.json()
-        # The field name is 'mediaItemsSet' (boolean)
-        return data.get("mediaItemsSet", False)
-    return False
-
-def get_picked_media_items(creds, session_id):
-    """Fetches media items picked during a session and downloads them with pagination support."""
-    headers = {
-        "Authorization": f"Bearer {creds.token}"
-    }
-    
-    # Session ID for listing is the simple ID part
-    simple_id = session_id.split('/')[-1]
-    
-    all_media_items = []
-    next_page_token = None
-    
-    while True:
-        url = f"{API_BASE}/mediaItems?sessionId={simple_id}"
-        if next_page_token:
-            url += f"&pageToken={next_page_token}"
-            
-        print(f"Fetching media items from: {url}")
-        response = requests.get(url, headers=headers)
-        
-        if response.status_code != 200:
-            print(f"Error fetching picked media items: {response.status_code} - {response.text}")
-            break
-            
-        data = response.json()
-        items = data.get("mediaItems", [])
-        all_media_items.extend(items)
-        
-        next_page_token = data.get("nextPageToken")
-        if not next_page_token:
-            break
-            
-    print(f"Total media items found: {len(all_media_items)}")
-    
-    downloaded_count = 0
-    os.makedirs("invoices", exist_ok=True)
-    
-    for item in all_media_items:
-        # Picker API structure: mediaFile object contains baseUrl, filename, and mimeType
-        media_file = item.get("mediaFile", {})
-        base_url = media_file.get("baseUrl")
-        original_filename = media_file.get("filename") or f"photo_{item.get('id', 'unknown')}"
-        
-        if base_url:
-            print(f"Downloading {original_filename}...")
-            # Append '=d' to baseUrl for original image download
-            download_url = f"{base_url}=d"
-            try:
-                # Per Docs: Requests to baseUrl MUST include Authorization header
-                img_response = requests.get(download_url, headers=headers)
-                
-                if img_response.status_code == 200:
-                    # Clean filename to avoid issues
-                    safe_filename = "".join([c for c in original_filename if c.isalnum() or c in "._- "]).strip()
-                    filepath = os.path.join("invoices", f"picker_{item.get('id', '')[:8]}_{safe_filename}")
-                    
-                    with open(filepath, "wb") as f:
-                        f.write(img_response.content)
-                    print(f"Successfully saved to {filepath}")
-                    downloaded_count += 1
-                else:
-                    print(f"Failed to download image: {img_response.status_code} - {img_response.text}")
-            except Exception as e:
-                print(f"Exception during download of {original_filename}: {e}")
-        else:
-            print(f"No baseUrl found for item {item.get('id')}")
-            
-    return downloaded_count</code></pre>
-            </div>
-
-            <div id="photos_app" class="section">
-                <div class="code-header">
-                    <span class="code-title">standalone_app.py</span>
-                    <button class="copy-btn" onclick="copyCode('code-photos-app', this)">
-                        <i class="far fa-copy"></i> Copy code
-                    </button>
-                </div>
-                <pre><code class="language-python" id="code-photos-app">import os
-import json
+<pre><code id="code_app_py" class="language-python">import os, json, asyncio
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
-from google.oauth2.credentials import Credentials
-from google.auth.transport.requests import Request as GoogleRequest
-from dotenv import load_dotenv
 
-import os
-import sys
-# Make sure the current folder is in path to import photos logic correctly
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from photos import create_picker_session, check_session_status, get_picked_media_items
-
-# Configure standalone app
 app = FastAPI()
-templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "templates"))
-TOKEN_FILE = os.path.join(os.path.dirname(__file__), "..", "token.json")
-SCOPES = ['https://www.googleapis.com/auth/photospicker.mediaitems.readonly']
+DRIVE_SETTINGS_FILE = "drive_settings.json"
 
-@app.get("/", response_class=HTMLResponse)
-async def picker_home(request: Request):
-    """Simple UI for the standalone picker."""
-    is_authenticated = os.path.exists(TOKEN_FILE)
-    if not is_authenticated:
-        return "Please authenticate first using the main app."
-    return templates.TemplateResponse("picker.html", {"request": request})
-
-@app.post("/photos/start")
-async def photos_start_endpoint():
-    """Starts Google Photos Picker session."""
-    if not os.path.exists(TOKEN_FILE):
-        return {"error": "Authentication required"}
-    
-    creds = Credentials.from_authorized_user_file(TOKEN_FILE, SCOPES)
-    if creds.expired and creds.refresh_token:
-        creds.refresh(GoogleRequest())
-    
-    # Callback must match what's in your Google Console, using a dummy here
-    # Since the REST API doesn't use redirects, this is mostly for the session creation
-    session, error = create_picker_session(creds)
-    
-    if session and "pickerUri" in session:
-        return {
-            "status": "success", 
-            "pickerUri": session["pickerUri"],
-            "sessionId": session["id"] 
-        }
-    else:
-        return {"error": error or "Failed to create picker session"}
-
-@app.get("/photos/status/{sessionId:path}")
-async def photos_status_endpoint(sessionId: str):
-    """Checks completion status."""
-    creds = Credentials.from_authorized_user_file(TOKEN_FILE, SCOPES)
-    if creds.expired and creds.refresh_token:
-        creds.refresh(GoogleRequest())
-    
-    is_done = check_session_status(creds, sessionId)
-    return {"status": "success", "is_done": is_done}
-
-@app.post("/photos/complete/{sessionId:path}")
-async def photos_complete_endpoint(sessionId: str):
-    """Processes downloaded photos."""
-    creds = Credentials.from_authorized_user_file(TOKEN_FILE, SCOPES)
-    if creds.expired and creds.refresh_token:
-        creds.refresh(GoogleRequest())
-    
-    count = get_picked_media_items(creds, sessionId)
-    return {"status": "success", "count": count}
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8001)</code></pre>
-            </div>
-
-            <div id="photos_ui" class="section">
-                <div class="code-header">
-                    <span class="code-title">picker.html</span>
-                    <button class="copy-btn" onclick="copyCode('code-photos-ui', this)">
-                        <i class="far fa-copy"></i> Copy code
-                    </button>
-                </div>
-                <pre><code class="language-html" id="code-photos-ui">&lt;!DOCTYPE html&gt;
-&lt;html lang="en"&gt;
-&lt;head&gt;
-    &lt;meta charset="UTF-8"&gt;
-    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
-    &lt;title&gt;Google Photos Picker Demo&lt;/title&gt;
-    &lt;link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&amp;display=swap" rel="stylesheet"&gt;
-    &lt;style&gt;
-        body { font-family: 'Outfit', sans-serif; background: #0f172a; color: #f8fafc; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .card { background: #1e293b; padding: 2.5rem; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); text-align: center; max-width: 400px; }
-        h1 { margin-bottom: 1rem; }
-        p { color: #94a3b8; margin-bottom: 2rem; line-height: 1.6; }
-        .btn { display: inline-flex; align-items: center; gap: 10px; background: #6366f1; color: white; padding: 1rem 1.5rem; border-radius: 12px; text-decoration: none; font-weight: 600; transition: 0.3s; border: none; cursor: pointer; }
-        .btn:hover { background: #4f46e5; transform: translateY(-2px); box-shadow: 0 10px 15px rgba(99, 102, 241, 0.4); }
-        #status { margin-top: 1.5rem; font-weight: 500; font-size: 0.9rem; }
-    &lt;/style&gt;
-&lt;/head&gt;
-&lt;body&gt;
-    &lt;div class="card"&gt;
-        &lt;h1&gt;Google Photos Picker&lt;/h1&gt;
-        &lt;p&gt;This is a standalone demo of how to connect and pick media using the Google Photos Picker API.&lt;/p&gt;
-        
-        &lt;button onclick="startPicker()" class="btn"&gt;
-            Pick from Google Photos
-        &lt;/button&gt;
-        
-        &lt;div id="status"&gt;&lt;/div&gt;
-    &lt;/div&gt;
-
-    &lt;script&gt;
-        async function startPicker() {
-            const statusDiv = document.getElementById('status');
-            statusDiv.innerText = "Initializing session...";
+# ======================================================================
+# THE AUTOMATOR ENGINE
+# ======================================================================
+async def drive_auto_fetch_task():
+    while True:
+        # Await endlessly gracefully if settings aren't setup yet
+        if not os.path.exists(DRIVE_SETTINGS_FILE):
+            await asyncio.sleep(60) 
+            continue
             
-            try {
-                const response = await fetch('/photos/start', { method: 'POST' });
-                const data = await response.json();
-                
-                if (data.status === 'success' &amp;&amp; data.pickerUri) {
-                    const pickerUrl = data.pickerUri + '/autoclose';
-                    const sessionId = data.sessionId;
-                    
-                    window.open(pickerUrl, 'PickerPopup', 'width=600,height=700');
-                    statusDiv.innerText = "Waiting for selection in popup...";
-                    
-                    const poller = setInterval(async () =&gt; {
-                        const sResp = await fetch(`/photos/status/${sessionId}`);
-                        const sData = await sResp.json();
-                        
-                        if (sData.is_done) {
-                            clearInterval(poller);
-                            statusDiv.innerText = "Downloading items...";
-                            const cResp = await fetch(`/photos/complete/${sessionId}`, { method: 'POST' });
-                            const cData = await cResp.json();
-                            alert(`Successfully picked and downloaded ${cData.count} items!`);
-                            statusDiv.innerText = "All items downloaded successfully.";
-                        }
-                    }, 3000);
-                } else {
-                    statusDiv.innerText = "Error: " + (data.error || "Unknown error");
-                }
-            } catch (e) {
-                statusDiv.innerText = "Connection error: " + e.message;
-            }
-        }
-    &lt;/script&gt;
-&lt;/body&gt;
-&lt;/html&gt;</code></pre>
+        # Dynamically read JSON config so restarts aren't required when updated via UI
+        with open(DRIVE_SETTINGS_FILE, "r") as f:
+            settings = json.load(f)
+            
+        folder_id = settings.get("folder_id")
+        interval_minutes = int(settings.get("interval_minutes", 60))
+        
+        if folder_id:
+            # ---> INSERT GOOGLE API CONNECTION + EXTRACTION HERE <---
+            print(f"Triggering fetch loop for target Drive ID: {folder_id}")
+            
+        # CRITICAL YIELD: Relinquish core thread back to the uvicorn webserver
+        await asyncio.sleep(interval_minutes * 60)
+
+# Mount loop explicitly to Uvicorn startup lifecycle 
+@app.on_event("startup")
+async def startup_event():
+    asyncio.create_task(drive_auto_fetch_task())
+
+
+# ======================================================================
+# API COMMUNICATION BRIDGES
+# ======================================================================
+@app.post("/drive/settings")
+async def save_drive_settings(request: Request):
+    """Write UI Form Configs strictly to Local Persistent Storage"""
+    data = await request.json()
+    with open(DRIVE_SETTINGS_FILE, "w") as f:
+        json.dump({
+            "folder_id": data.get("folder_id"), 
+            "interval_minutes": data.get("interval_minutes", 60)
+        }, f)
+    return {"status": "success"}
+
+@app.get("/drive/folders")
+async def get_drive_folders_endpoint():
+    """Retrieve Google Drive IDs and safely marshal to Browser"""
+    # ... Google Service Auth ...
+    return {
+        "status": "success", 
+        "folders": [{"id": "X1Z2_A", "name": "Corporate Invoices"}]
+    }</code></pre>
             </div>
-        </main>
+        </div>
     </div>
 
+    <!-- Syntax Highlighting Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+    <!-- Interface Mechanics -->
     <script>
-        function showSection(id) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            const navItems = document.querySelectorAll('.nav-item');
-            navItems.forEach(item => {
-                if (item.getAttribute('onclick').includes(id)) {
-                    item.classList.add('active');
-                }
-            });
-            
-            if (id !== 'overview') {
-                Prism.highlightAll();
-            }
+        // Tab routing configuration
+        function showFile(fileId, element) {
+            document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+
+            document.querySelectorAll('.file-content').forEach(el => el.classList.remove('active'));
+            // Trigger animation refresh
+            const target = document.getElementById(fileId);
+            target.style.animation = 'none';
+            target.offsetHeight; // Trigger reflow
+            target.style.animation = null;
+            target.classList.add('active');
         }
 
-        async function copyCode(elementId, btn) {
-            const code = document.getElementById(elementId).innerText;
-            try {
-                await navigator.clipboard.writeText(code);
-                const originalText = btn.innerHTML;
-                btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
-                btn.style.background = '#22c55e';
-                btn.style.color = '#fff';
+        // Dedicated universal Copy To Clipboard feature
+        function copyCode(targetId, btnElement) {
+            const htmlNodeCode = document.getElementById(targetId).innerText;
+            navigator.clipboard.writeText(htmlNodeCode).then(() => {
+                
+                // Styling feedback
+                const originalHtml = btnElement.innerHTML;
+                btnElement.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                btnElement.classList.add('copied');
+                
                 setTimeout(() => {
-                    btn.innerHTML = originalText;
-                    btn.style.background = 'rgba(56, 189, 248, 0.1)';
-                    btn.style.color = 'var(--accent)';
+                    btnElement.innerHTML = originalHtml;
+                    btnElement.classList.remove('copied');
                 }, 2000);
-            } catch (err) {
-                console.error('Failed to copy!', err);
-            }
+            }).catch(err => {
+                console.error("Clipboard restriction or UI error:", err);
+                alert("Please manually select and copy text. Document permissions deny clipboard usage.");
+            });
         }
     </script>
 </body>
