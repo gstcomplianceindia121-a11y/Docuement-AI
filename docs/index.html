@@ -243,6 +243,23 @@
             <i class="fab fa-python" style="color: #3572A5; font-size: 1.2rem;"></i>
             app.py
         </div>
+
+        <div class="sidebar-title">Security Modules</div>
+        
+        <div class="sidebar-item" onclick="showFile('pdf_manager_py', this)">
+            <i class="fas fa-shield-alt" style="color: #10b981; font-size: 1.2rem;"></i>
+            pdf_manager.py
+        </div>
+
+        <div class="sidebar-item" onclick="showFile('api_routes_py', this)">
+            <i class="fas fa-network-wired" style="color: #6366f1; font-size: 1.2rem;"></i>
+            security_routes.py
+        </div>
+
+        <div class="sidebar-item" onclick="showFile('frontend_logic_js', this)">
+            <i class="fab fa-js-square" style="color: #f7df1e; font-size: 1.2rem;"></i>
+            security_logic.js
+        </div>
     </div>
     
     <!-- Code Viewing Area -->
@@ -253,7 +270,7 @@
             <div class="header-row">
                 <div class="header-text">
                     <h2><i class="fab fa-html5" style="color: #e34c26;"></i> drive.html <span style="font-size: 0.9rem; background: rgba(227, 76, 38, 0.1); padding: 4px 8px; border-radius: 6px; font-weight: 600; vertical-align: middle;">Frontend</span></h2>
-                    <p>Minimal, unstyled HTML bridge logic to capture and transmit the scheduling timeline back to the background agent.</p>
+                    <p>Premium UI implementation featuring a local PDF security scanner with real-time feedback and password visibility toggles.</p>
                 </div>
             </div>
             
@@ -268,53 +285,39 @@
                         <i class="far fa-copy"></i> Copy Source
                     </button>
                 </div>
-<pre><code id="code_drive_html" class="language-html">&lt;!-- 1. Barebones User Interface Elements --&gt;
-&lt;div&gt;
-    &lt;label&gt;Select Drive Folder: &lt;/label&gt;
-    &lt;select id="drive-folder"&gt;&lt;/select&gt;
-
-    &lt;label&gt;Fetch Interval (Minutes): &lt;/label&gt;
-    &lt;input type="number" id="drive-interval" value="60"&gt;
-
-    &lt;button onclick="saveDriveSettings()"&gt;Start Sync&lt;/button&gt;
+<pre><code id="code_drive_html" class="language-html">&lt;!-- 1. Local PDF Security Scanner UI --&gt;
+&lt;div class="scanner-card"&gt;
+    &lt;i class="fas fa-shield-alt"&gt;&lt;/i&gt;
+    &lt;p&gt;Upload PDF to scan for local protection&lt;/p&gt;
+    &lt;button onclick="uploadAndScan()"&gt;Scan Security&lt;/button&gt;
 &lt;/div&gt;
 
-&lt;!-- 2. Connection Logic --&gt;
+&lt;!-- 2. Password Modal with Visibility Toggle --&gt;
+&lt;div id="password-modal" class="modal-overlay"&gt;
+    &lt;div class="password-box"&gt;
+        &lt;h3&gt;Encrypted File Detected&lt;/h3&gt;
+        &lt;div class="input-group"&gt;
+            &lt;input type="password" id="pdf-password" placeholder="Enter Password"&gt;
+            &lt;i class="fas fa-eye" onclick="togglePasswordVisibility()"&gt;&lt;/i&gt;
+        &lt;/div&gt;
+        &lt;button onclick="submitPassword()"&gt;Decrypt &amp; Process&lt;/button&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+
 &lt;script&gt;
-    // Step A: Request Google Drive folders from Backend to populate options
-    async function loadDriveFolders() {
-        const response = await fetch('/drive/folders');
-        const data = await response.json();
-        
-        const select = document.getElementById('drive-folder');
-        select.innerHTML = ''; 
-        
-        data.folders.forEach(folder =&gt; {
-            select.innerHTML += `&lt;option value="${folder.id}"&gt;${folder.name}&lt;/option&gt;`;
-        });
-    }
+async function uploadAndScan() {
+    // Backend returns 'locked' if protection detected
+    const response = await fetch('/drive/upload', { method: 'POST', body: formData });
+    const data = await response.json();
+    if (data.status === 'locked') showPasswordModal();
+}
 
-    // Step B: Bundle Interval Timer + Target ID and POST to Backend Configuration
-    async function saveDriveSettings() {
-        const payload = {
-            folder_id: document.getElementById('drive-folder').value,
-            interval_minutes: document.getElementById('drive-interval').value
-        };
-
-        const response = await fetch('/drive/settings', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-        
-        const data = await response.json();
-        if (data.status === 'success') {
-            alert('Automation Saved! Fetching begins in the background.');
-        }
-    }
-
-    // Auto-trigger folder extraction instantly on page load
-    window.addEventListener('load', loadDriveFolders);
+async function submitPassword() {
+    // Decrypts and automatically triggers processing pipeline
+    const response = await fetch('/drive/unlock', { method: 'POST', body: formData });
+    const data = await response.json();
+    if (data.status === 'success') alert('Unlocked & Processed!');
+}
 &lt;/script&gt;</code></pre>
             </div>
         </div>
@@ -397,6 +400,146 @@ async def get_drive_folders_endpoint():
         "status": "success", 
         "folders": [{"id": "X1Z2_A", "name": "Corporate Invoices"}]
     }</code></pre>
+            </div>
+        </div>
+
+        <!-- PDF_MANAGER.PY CONTENT -->
+        <div id="pdf_manager_py" class="file-content">
+            <div class="header-row">
+                <div class="header-text">
+                    <h2><i class="fas fa-shield-alt" style="color: #10b981;"></i> pdf_manager.py <span style="font-size: 0.9rem; background: rgba(16, 185, 129, 0.1); padding: 4px 8px; border-radius: 6px; font-weight: 600; vertical-align: middle;">Logic</span></h2>
+                    <p>Scanning engine that detects PDF protection layers and performs clean decryption using AES-256 standards.</p>
+                </div>
+            </div>
+            
+            <div class="code-container">
+                <div class="code-header">
+                    <div class="mac-dots">
+                        <div class="mac-dot red"></div>
+                        <div class="mac-dot yellow"></div>
+                        <div class="mac-dot green"></div>
+                    </div>
+                    <button class="copy-btn" onclick="copyCode('code_pdf_manager', this)">
+                        <i class="far fa-copy"></i> Copy Source
+                    </button>
+                </div>
+<pre><code id="code_pdf_manager" class="language-python">import fitz # PyMuPDF
+
+def check_pdf_protection(file_path):
+    """Scan PDF for encryption state"""
+    doc = fitz.open(file_path)
+    is_protected = doc.is_encrypted
+    # Return (is_locked, is_authenticated_with_empty_pass)
+    return is_protected, doc.authenticate("") != 0
+
+def unlock_pdf(file_path, password, output_path):
+    """Decrypt PDF and save security-free version"""
+    doc = fitz.open(file_path)
+    if doc.authenticate(password):
+        # Save with encryption=0 to remove all protection
+        doc.save(output_path, encryption=0)
+        return True, "Success"
+    return False, "Invalid Password"</code></pre>
+            </div>
+        </div>
+
+        <!-- API_ROUTES.PY CONTENT -->
+        <div id="api_routes_py" class="file-content">
+            <div class="header-row">
+                <div class="header-text">
+                    <h2><i class="fas fa-network-wired" style="color: #6366f1;"></i> security_routes.py <span style="font-size: 0.9rem; background: rgba(99, 102, 241, 0.1); padding: 4px 8px; border-radius: 6px; font-weight: 600; vertical-align: middle;">API Routes</span></h2>
+                    <p>FastAPI endpoints managing the upload, verification, and automated background processing of financial documents.</p>
+                </div>
+            </div>
+            
+            <div class="code-container">
+                <div class="code-header">
+                    <div class="mac-dots">
+                        <div class="mac-dot red"></div>
+                        <div class="mac-dot yellow"></div>
+                        <div class="mac-dot green"></div>
+                    </div>
+                    <button class="copy-btn" onclick="copyCode('code_api_routes', this)">
+                        <i class="far fa-copy"></i> Copy Source
+                    </button>
+                </div>
+<pre><code id="code_api_routes" class="language-python">@app.post("/drive/upload")
+async def upload_pdf(file: UploadFile = File(...)):
+    # ... logic to save file ...
+    is_locked, is_free = check_pdf_protection(file_path)
+    
+    if is_locked and not is_free:
+        return {"status": "locked", "msg": "Password Required"}
+    
+    # Auto-Process if not locked
+    process_invoices()
+    return {"status": "success"}
+
+@app.post("/drive/unlock")
+async def unlock_endpoint(filename: str = Form(...), password: str = Form(...)):
+    success, msg = unlock_pdf(input_path, password, output_path)
+    if success:
+        # Move to invoices & trigger pipeline
+        shutil.copy(output_path, "invoices/")
+        process_invoices()
+        return {"status": "success"}
+    return {"status": "error", "message": "Wrong Password"}</code></pre>
+            </div>
+        </div>
+
+        <!-- FRONTEND_LOGIC.JS CONTENT -->
+        <div id="frontend_logic_js" class="file-content">
+            <div class="header-row">
+                <div class="header-text">
+                    <h2><i class="fab fa-js-square" style="color: #f7df1e;"></i> security_logic.js <span style="font-size: 0.9rem; background: rgba(247, 223, 30, 0.1); padding: 4px 8px; border-radius: 6px; font-weight: 600; vertical-align: middle;">Logic</span></h2>
+                    <p>Client-side implementation of the security handshake, including password toggling and the automation bridge.</p>
+                </div>
+            </div>
+            
+            <div class="code-container">
+                <div class="code-header">
+                    <div class="mac-dots">
+                        <div class="mac-dot red"></div>
+                        <div class="mac-dot yellow"></div>
+                        <div class="mac-dot green"></div>
+                    </div>
+                    <button class="copy-btn" onclick="copyCode('code_js_logic', this)">
+                        <i class="far fa-copy"></i> Copy Source
+                    </button>
+                </div>
+<pre><code id="code_js_logic" class="language-javascript">// 1. Toggle Password Visibility (The Eye Icon)
+function togglePasswordVisibility() {
+    const pwdInput = document.getElementById('pdf-password');
+    const eyeIcon = document.getElementById('togglePassword');
+    
+    if (pwdInput.type === 'password') {
+        pwdInput.type = 'text';
+        eyeIcon.classList.replace('fa-eye', 'fa-eye-slash');
+    } else {
+        pwdInput.type = 'password';
+        eyeIcon.classList.replace('fa-eye-slash', 'fa-eye');
+    }
+}
+
+// 2. The Unlock automation bridge
+async function submitPassword() {
+    const password = document.getElementById('pdf-password').value;
+    const formData = new FormData();
+    formData.append('filename', currentFilename);
+    formData.append('password', password);
+
+    // Backend Decrypts -> Moves to Invoices -> Routes to Extraction
+    const response = await fetch('/drive/unlock', {
+        method: 'POST',
+        body: formData
+    });
+    
+    const data = await response.json();
+    if (data.status === 'success') {
+        renderSuccess(data.processed_count);
+        closeModal();
+    }
+}</code></pre>
             </div>
         </div>
     </div>
