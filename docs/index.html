@@ -2,586 +2,1977 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Agentic Reference | Drive Syncing Module</title>
-    <!-- Modern Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <!-- FontAwesome Icons -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <!-- Prism Syntax Highlighting Theme -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Work Source | SmartBooks</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
         :root {
-            --primary: #6366f1;
-            --primary-hover: #4f46e5;
-            --bg-color: #0f172a;
-            --sidebar-bg: rgba(30, 41, 59, 0.7);
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --border-color: rgba(255, 255, 255, 0.08);
-            --code-bg: #0b1121;
+            --bg-main: #020617;
+            --bg-sidebar: #0f172a;
+            --bg-card: #1e293b;
+            --bg-accent: #38bdf8;
+            --accent-glow: rgba(56, 189, 248, 0.2);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Outfit', sans-serif;
-            background-color: var(--bg-color);
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.1) 0px, transparent 50%);
-            background-attachment: fixed;
-            color: var(--text-main);
-            display: flex;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
             height: 100vh;
             overflow: hidden;
         }
 
-        /* Sidebar Styling */
+        .layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            height: 100vh;
+        }
+
+        /* Sidebar */
         .sidebar {
-            width: 280px;
-            background: var(--sidebar-bg);
-            backdrop-filter: blur(12px);
-            border-right: 1px solid var(--border-color);
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            padding: 2rem;
             display: flex;
             flex-direction: column;
-            padding: 2rem 1rem;
+            gap: 2rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--bg-accent);
+        }
+
+        .nav-links { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+
+        .nav-item {
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.9rem;
+        }
+
+        .nav-item.active {
+            background: var(--bg-card);
+            color: var(--bg-accent);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .nav-item:hover {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        /* Main */
+        .main {
+            padding: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            padding: 1.5rem 2rem;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             z-index: 10;
         }
 
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 800;
-            font-size: 1.2rem;
-            margin-bottom: 2.5rem;
-            padding: 0 10px;
-            color: #fff;
-        }
+        .header h2 { font-size: 1.1rem; font-weight: 600; }
 
-        .brand i {
-            color: var(--primary);
-            font-size: 1.4rem;
-        }
-
-        .sidebar-title {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--text-muted);
+        .btn-copy {
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--bg-accent);
+            border: 1px solid var(--bg-accent);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.85rem;
             font-weight: 600;
-            margin-bottom: 1rem;
-            padding: 0 10px;
-        }
-
-        .sidebar-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 14px;
-            border-radius: 12px;
             cursor: pointer;
-            color: var(--text-muted);
-            font-weight: 500;
-            transition: all 0.3s ease;
-            margin-bottom: 0.5rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .sidebar-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-            color: #fff;
-        }
-
-        .sidebar-item.active {
-            background: rgba(99, 102, 241, 0.15);
-            color: var(--primary);
-            border: 1px solid rgba(99, 102, 241, 0.3);
-        }
-
-        /* Main Content Area */
-        .content {
-            flex: 1;
-            padding: 3rem 4rem;
-            overflow-y: auto;
-            position: relative;
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
-
-        .file-content {
-            display: none;
-            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-            opacity: 0;
-            transform: translateY(20px);
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
-        .file-content.active {
-            display: block;
-        }
-
-        @keyframes slideUp {
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 2rem;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 1.5rem;
-        }
-
-        .header-text h2 {
-            font-size: 2rem;
-            font-weight: 800;
-            margin-bottom: 0.5rem;
+            transition: 0.2s;
             display: flex;
             align-items: center;
-            gap: 12px;
-        }
-
-        .header-text p {
-            color: var(--text-muted);
-            font-size: 1.05rem;
-            line-height: 1.5;
-            max-width: 600px;
-        }
-
-        /* Code Block Styling */
-        .code-container {
-            position: relative;
-            background: var(--code-bg);
-            border-radius: 16px;
-            border: 1px solid var(--border-color);
-            overflow: hidden;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-        }
-
-        .code-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 20px;
-            background: rgba(255, 255, 255, 0.03);
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .mac-dots {
-            display: flex;
             gap: 8px;
         }
 
-        .mac-dot {
-            width: 12px; height: 12px; border-radius: 50%;
+        .btn-copy:hover {
+            background: var(--bg-accent);
+            color: #000;
         }
-        .mac-dot.red { background: #ff5f56; }
-        .mac-dot.yellow { background: #ffbd2e; }
-        .mac-dot.green { background: #27c93f; }
 
-        pre[class*="language-"] {
+        .code-container {
+            flex: 1;
+            overflow: auto;
+            position: relative;
+            background: #0d1117;
+        }
+
+        pre {
             margin: 0 !important;
             padding: 2rem !important;
-            background: transparent !important;
-            font-size: 0.95rem;
-            border-radius: 0 0 16px 16px;
+            font-family: 'JetBrains Mono', monospace !important;
+            font-size: 14px !important;
+            line-height: 1.5 !important;
         }
 
-        .copy-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: var(--text-main);
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-family: 'Outfit', sans-serif;
-            font-weight: 600;
-            font-size: 0.85rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.2s;
-        }
-
-        .copy-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateY(-1px);
-        }
-
-        .copy-btn.copied {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: white;
-        }
+        code { font-family: inherit !important; }
     </style>
 </head>
 <body>
-    
-    <!-- Sidebar / Explorer Menu -->
-    <div class="sidebar">
-        <div class="brand">
-            <i class="fas fa-layer-group"></i>
-            Agentic Modules
-        </div>
-        
-        <div class="sidebar-title">Core Implementation</div>
-        
-        <div class="sidebar-item active" onclick="showFile('drive_html', this)">
-            <i class="fab fa-html5" style="color: #e34c26; font-size: 1.2rem;"></i>
-            drive.html
-        </div>
-        
-        <div class="sidebar-item" onclick="showFile('app_py', this)">
-            <i class="fab fa-python" style="color: #3572A5; font-size: 1.2rem;"></i>
-            app.py
-        </div>
 
-        <div class="sidebar-title">Security Modules</div>
-        
-        <div class="sidebar-item" onclick="showFile('pdf_manager_py', this)">
-            <i class="fas fa-shield-alt" style="color: #10b981; font-size: 1.2rem;"></i>
-            pdf_manager.py
-        </div>
-
-        <div class="sidebar-item" onclick="showFile('api_routes_py', this)">
-            <i class="fas fa-network-wired" style="color: #6366f1; font-size: 1.2rem;"></i>
-            security_routes.py
-        </div>
-
-        <div class="sidebar-item" onclick="showFile('frontend_logic_js', this)">
-            <i class="fab fa-js-square" style="color: #f7df1e; font-size: 1.2rem;"></i>
-            security_logic.js
-        </div>
-    </div>
-    
-    <!-- Code Viewing Area -->
-    <div class="content">
-        
-        <!-- DRIVE.HTML CONTENT -->
-        <div id="drive_html" class="file-content active">
-            <div class="header-row">
-                <div class="header-text">
-                    <h2><i class="fab fa-html5" style="color: #e34c26;"></i> drive.html <span style="font-size: 0.9rem; background: rgba(227, 76, 38, 0.1); padding: 4px 8px; border-radius: 6px; font-weight: 600; vertical-align: middle;">Frontend</span></h2>
-                    <p>Premium UI implementation featuring a local PDF security scanner with real-time feedback and password visibility toggles.</p>
-                </div>
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fas fa-code"></i> Workspace
             </div>
+            <ul class="nav-links">
+                <li class="nav-item active">
+                    <i class="far fa-file-code"></i> landing.html
+                </li>
+            </ul>
+        </aside>
+
+        <main class="main">
+            <header class="header">
+                <h2>landing.html <span style="font-weight: 400; opacity: 0.5; font-size: 0.9rem; margin-left: 8px;">/ Source Code</span></h2>
+                <button class="btn-copy" onclick="copyCode('source-code', this)">
+                    <i class="far fa-copy"></i> Copy code
+                </button>
+            </header>
             
             <div class="code-container">
-                <div class="code-header">
-                    <div class="mac-dots">
-                        <div class="mac-dot red"></div>
-                        <div class="mac-dot yellow"></div>
-                        <div class="mac-dot green"></div>
-                    </div>
-                    <button class="copy-btn" onclick="copyCode('code_drive_html', this)">
-                        <i class="far fa-copy"></i> Copy Source
-                    </button>
-                </div>
-<pre><code id="code_drive_html" class="language-html">&lt;!-- 1. Local PDF Security Scanner UI --&gt;
-&lt;div class="scanner-card"&gt;
-    &lt;i class="fas fa-shield-alt"&gt;&lt;/i&gt;
-    &lt;p&gt;Upload PDF to scan for local protection&lt;/p&gt;
-    &lt;button onclick="uploadAndScan()"&gt;Scan Security&lt;/button&gt;
-&lt;/div&gt;
+<pre><code class="language-html" id="source-code">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
 
-&lt;!-- 2. Password Modal with Visibility Toggle --&gt;
-&lt;div id="password-modal" class="modal-overlay"&gt;
-    &lt;div class="password-box"&gt;
-        &lt;h3&gt;Encrypted File Detected&lt;/h3&gt;
-        &lt;div class="input-group"&gt;
-            &lt;input type="password" id="pdf-password" placeholder="Enter Password"&gt;
-            &lt;i class="fas fa-eye" onclick="togglePasswordVisibility()"&gt;&lt;/i&gt;
-        &lt;/div&gt;
-        &lt;button onclick="submitPassword()"&gt;Decrypt &amp; Process&lt;/button&gt;
-    &lt;/div&gt;
-&lt;/div&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;SmartBooks — Audit Automation for Accounting Professionals&lt;/title&gt;
+    &lt;meta name="description"
+        content="SmartBooks automates invoice extraction, bank statement classification and Tally ERP reporting for CA firms, auditors and finance teams."&gt;
 
-&lt;script&gt;
-async function uploadAndScan() {
-    // Backend returns 'locked' if protection detected
-    const response = await fetch('/drive/upload', { method: 'POST', body: formData });
-    const data = await response.json();
-    if (data.status === 'locked') showPasswordModal();
-}
+    &lt;link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,300&amp;family=Outfit:wght@600;700;800&amp;display=swap"
+        rel="stylesheet"&gt;
+    &lt;link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"&gt;
 
-async function submitPassword() {
-    // Decrypts and automatically triggers processing pipeline
-    const response = await fetch('/drive/unlock', { method: 'POST', body: formData });
-    const data = await response.json();
-    if (data.status === 'success') alert('Unlocked & Processed!');
-}
-&lt;/script&gt;</code></pre>
-            </div>
-        </div>
-
-        <!-- APP.PY CONTENT -->
-        <div id="app_py" class="file-content">
-            <div class="header-row">
-                <div class="header-text">
-                    <h2><i class="fab fa-python" style="color: #3572A5;"></i> app.py <span style="font-size: 0.9rem; background: rgba(53, 114, 165, 0.1); padding: 4px 8px; border-radius: 6px; font-weight: 600; vertical-align: middle;">Backend</span></h2>
-                    <p>The core structural backbone demonstrating how FastAPI sustains non-blocking infinite interval polling without breaking HTTP streams.</p>
-                </div>
-            </div>
-            
-            <div class="code-container">
-                <div class="code-header">
-                    <div class="mac-dots">
-                        <div class="mac-dot red"></div>
-                        <div class="mac-dot yellow"></div>
-                        <div class="mac-dot green"></div>
-                    </div>
-                    <button class="copy-btn" onclick="copyCode('code_app_py', this)">
-                        <i class="far fa-copy"></i> Copy Source
-                    </button>
-                </div>
-<pre><code id="code_app_py" class="language-python">import os, json, asyncio
-from fastapi import FastAPI, Request
-
-app = FastAPI()
-DRIVE_SETTINGS_FILE = "drive_settings.json"
-
-# ======================================================================
-# THE AUTOMATOR ENGINE
-# ======================================================================
-async def drive_auto_fetch_task():
-    while True:
-        # Await endlessly gracefully if settings aren't setup yet
-        if not os.path.exists(DRIVE_SETTINGS_FILE):
-            await asyncio.sleep(60) 
-            continue
-            
-        # Dynamically read JSON config so restarts aren't required when updated via UI
-        with open(DRIVE_SETTINGS_FILE, "r") as f:
-            settings = json.load(f)
-            
-        folder_id = settings.get("folder_id")
-        interval_minutes = int(settings.get("interval_minutes", 60))
-        
-        if folder_id:
-            # ---> INSERT GOOGLE API CONNECTION + EXTRACTION HERE <---
-            print(f"Triggering fetch loop for target Drive ID: {folder_id}")
-            
-        # CRITICAL YIELD: Relinquish core thread back to the uvicorn webserver
-        await asyncio.sleep(interval_minutes * 60)
-
-# Mount loop explicitly to Uvicorn startup lifecycle 
-@app.on_event("startup")
-async def startup_event():
-    asyncio.create_task(drive_auto_fetch_task())
-
-
-# ======================================================================
-# API COMMUNICATION BRIDGES
-# ======================================================================
-@app.post("/drive/settings")
-async def save_drive_settings(request: Request):
-    """Write UI Form Configs strictly to Local Persistent Storage"""
-    data = await request.json()
-    with open(DRIVE_SETTINGS_FILE, "w") as f:
-        json.dump({
-            "folder_id": data.get("folder_id"), 
-            "interval_minutes": data.get("interval_minutes", 60)
-        }, f)
-    return {"status": "success"}
-
-@app.get("/drive/folders")
-async def get_drive_folders_endpoint():
-    """Retrieve Google Drive IDs and safely marshal to Browser"""
-    # ... Google Service Auth ...
-    return {
-        "status": "success", 
-        "folders": [{"id": "X1Z2_A", "name": "Corporate Invoices"}]
-    }</code></pre>
-            </div>
-        </div>
-
-        <!-- PDF_MANAGER.PY CONTENT -->
-        <div id="pdf_manager_py" class="file-content">
-            <div class="header-row">
-                <div class="header-text">
-                    <h2><i class="fas fa-shield-alt" style="color: #10b981;"></i> pdf_manager.py <span style="font-size: 0.9rem; background: rgba(16, 185, 129, 0.1); padding: 4px 8px; border-radius: 6px; font-weight: 600; vertical-align: middle;">Logic</span></h2>
-                    <p>Scanning engine that detects PDF protection layers and performs clean decryption using AES-256 standards.</p>
-                </div>
-            </div>
-            
-            <div class="code-container">
-                <div class="code-header">
-                    <div class="mac-dots">
-                        <div class="mac-dot red"></div>
-                        <div class="mac-dot yellow"></div>
-                        <div class="mac-dot green"></div>
-                    </div>
-                    <button class="copy-btn" onclick="copyCode('code_pdf_manager', this)">
-                        <i class="far fa-copy"></i> Copy Source
-                    </button>
-                </div>
-<pre><code id="code_pdf_manager" class="language-python">import fitz # PyMuPDF
-
-def check_pdf_protection(file_path):
-    """Scan PDF for encryption state"""
-    doc = fitz.open(file_path)
-    is_protected = doc.is_encrypted
-    # Return (is_locked, is_authenticated_with_empty_pass)
-    return is_protected, doc.authenticate("") != 0
-
-def unlock_pdf(file_path, password, output_path):
-    """Decrypt PDF and save security-free version"""
-    doc = fitz.open(file_path)
-    if doc.authenticate(password):
-        # Save with encryption=0 to remove all protection
-        doc.save(output_path, encryption=0)
-        return True, "Success"
-    return False, "Invalid Password"</code></pre>
-            </div>
-        </div>
-
-        <!-- API_ROUTES.PY CONTENT -->
-        <div id="api_routes_py" class="file-content">
-            <div class="header-row">
-                <div class="header-text">
-                    <h2><i class="fas fa-network-wired" style="color: #6366f1;"></i> security_routes.py <span style="font-size: 0.9rem; background: rgba(99, 102, 241, 0.1); padding: 4px 8px; border-radius: 6px; font-weight: 600; vertical-align: middle;">API Routes</span></h2>
-                    <p>FastAPI endpoints managing the upload, verification, and automated background processing of financial documents.</p>
-                </div>
-            </div>
-            
-            <div class="code-container">
-                <div class="code-header">
-                    <div class="mac-dots">
-                        <div class="mac-dot red"></div>
-                        <div class="mac-dot yellow"></div>
-                        <div class="mac-dot green"></div>
-                    </div>
-                    <button class="copy-btn" onclick="copyCode('code_api_routes', this)">
-                        <i class="far fa-copy"></i> Copy Source
-                    </button>
-                </div>
-<pre><code id="code_api_routes" class="language-python">@app.post("/drive/upload")
-async def upload_pdf(file: UploadFile = File(...)):
-    # ... logic to save file ...
-    is_locked, is_free = check_pdf_protection(file_path)
-    
-    if is_locked and not is_free:
-        return {"status": "locked", "msg": "Password Required"}
-    
-    # Auto-Process if not locked
-    process_invoices()
-    return {"status": "success"}
-
-@app.post("/drive/unlock")
-async def unlock_endpoint(filename: str = Form(...), password: str = Form(...)):
-    success, msg = unlock_pdf(input_path, password, output_path)
-    if success:
-        # Move to invoices & trigger pipeline
-        shutil.copy(output_path, "invoices/")
-        process_invoices()
-        return {"status": "success"}
-    return {"status": "error", "message": "Wrong Password"}</code></pre>
-            </div>
-        </div>
-
-        <!-- FRONTEND_LOGIC.JS CONTENT -->
-        <div id="frontend_logic_js" class="file-content">
-            <div class="header-row">
-                <div class="header-text">
-                    <h2><i class="fab fa-js-square" style="color: #f7df1e;"></i> security_logic.js <span style="font-size: 0.9rem; background: rgba(247, 223, 30, 0.1); padding: 4px 8px; border-radius: 6px; font-weight: 600; vertical-align: middle;">Logic</span></h2>
-                    <p>Client-side implementation of the security handshake, including password toggling and the automation bridge.</p>
-                </div>
-            </div>
-            
-            <div class="code-container">
-                <div class="code-header">
-                    <div class="mac-dots">
-                        <div class="mac-dot red"></div>
-                        <div class="mac-dot yellow"></div>
-                        <div class="mac-dot green"></div>
-                    </div>
-                    <button class="copy-btn" onclick="copyCode('code_js_logic', this)">
-                        <i class="far fa-copy"></i> Copy Source
-                    </button>
-                </div>
-<pre><code id="code_js_logic" class="language-javascript">// 1. Toggle Password Visibility (The Eye Icon)
-function togglePasswordVisibility() {
-    const pwdInput = document.getElementById('pdf-password');
-    const eyeIcon = document.getElementById('togglePassword');
-    
-    if (pwdInput.type === 'password') {
-        pwdInput.type = 'text';
-        eyeIcon.classList.replace('fa-eye', 'fa-eye-slash');
-    } else {
-        pwdInput.type = 'password';
-        eyeIcon.classList.replace('fa-eye-slash', 'fa-eye');
-    }
-}
-
-// 2. The Unlock automation bridge
-async function submitPassword() {
-    const password = document.getElementById('pdf-password').value;
-    const formData = new FormData();
-    formData.append('filename', currentFilename);
-    formData.append('password', password);
-
-    // Backend Decrypts -> Moves to Invoices -> Routes to Extraction
-    const response = await fetch('/drive/unlock', {
-        method: 'POST',
-        body: formData
-    });
-    
-    const data = await response.json();
-    if (data.status === 'success') {
-        renderSuccess(data.processed_count);
-        closeModal();
-    }
-}</code></pre>
-            </div>
-        </div>
-    </div>
-
-    <!-- Syntax Highlighting Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
-
-    <!-- Interface Mechanics -->
-    <script>
-        // Tab routing configuration
-        function showFile(fileId, element) {
-            document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
-            element.classList.add('active');
-
-            document.querySelectorAll('.file-content').forEach(el => el.classList.remove('active'));
-            // Trigger animation refresh
-            const target = document.getElementById(fileId);
-            target.style.animation = 'none';
-            target.offsetHeight; // Trigger reflow
-            target.style.animation = null;
-            target.classList.add('active');
+    &lt;style&gt;
+        :root {
+            --brand: #6366f1;
+            --brand-dim: rgba(99, 102, 241, 0.12);
+            --brand-glow: rgba(99, 102, 241, 0.25);
+            --green: #10b981;
+            --yellow: #f59e0b;
+            --bg-0: #070a10;
+            --bg-1: #0c1120;
+            --bg-2: #111827;
+            --bg-3: #1a2236;
+            --stroke: rgba(255, 255, 255, 0.07);
+            --stroke-hover: rgba(99, 102, 241, 0.4);
+            --text-1: #f1f5f9;
+            --text-2: #94a3b8;
+            --text-3: #64748b;
         }
 
-        // Dedicated universal Copy To Clipboard feature
-        function copyCode(targetId, btnElement) {
-            const htmlNodeCode = document.getElementById(targetId).innerText;
-            navigator.clipboard.writeText(htmlNodeCode).then(() => {
-                
-                // Styling feedback
-                const originalHtml = btnElement.innerHTML;
-                btnElement.innerHTML = '<i class="fas fa-check"></i> Copied!';
-                btnElement.classList.add('copied');
-                
-                setTimeout(() => {
-                    btnElement.innerHTML = originalHtml;
-                    btnElement.classList.remove('copied');
-                }, 2000);
-            }).catch(err => {
-                console.error("Clipboard restriction or UI error:", err);
-                alert("Please manually select and copy text. Document permissions deny clipboard usage.");
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg-0);
+            color: var(--text-1);
+            line-height: 1.75;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4 {
+            font-family: 'Outfit', sans-serif;
+            letter-spacing: -0.025em;
+        }
+
+        /* ─── Global canvas effect ─── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 40% at 70% -10%, rgba(99, 102, 241, 0.15) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at -10% 80%, rgba(6, 182, 212, 0.08) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ─── NAV ─── */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 7%;
+            height: 66px;
+            background: rgba(7, 10, 16, 0.7);
+            backdrop-filter: blur(16px) saturate(160%);
+            border-bottom: 1px solid var(--stroke);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text-1);
+            text-decoration: none;
+            letter-spacing: -0.03em;
+        }
+
+        .logo-icon {
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-2);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-1);
+        }
+
+        .btn-nav {
+            background: var(--brand);
+            color: #fff;
+            text-decoration: none;
+            padding: 0.55rem 1.25rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: all 0.25s;
+            box-shadow: 0 0 0 0 var(--brand-glow);
+        }
+
+        .btn-nav:hover {
+            background: #4f46e5;
+            box-shadow: 0 0 0 4px var(--brand-glow);
+        }
+
+        /* ─── HERO ─── */
+        .hero {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 9rem 7% 6rem;
+        }
+
+        .hero-inner {
+            max-width: 860px;
+        }
+
+        .hero-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--brand-dim);
+            color: var(--brand);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            padding: 5px 14px 5px 8px;
+            border-radius: 100px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 2rem;
+        }
+
+        .hero-pill span {
+            background: var(--brand);
+            color: #fff;
+            border-radius: 100px;
+            padding: 2px 8px;
+            font-size: 0.7rem;
+        }
+
+        .hero h1 {
+            font-size: clamp(3rem, 6vw, 5.5rem);
+            line-height: 1.0;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 1.75rem;
+        }
+
+        .hero h1 em {
+            font-style: normal;
+            background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-sub {
+            font-size: 1.2rem;
+            color: var(--text-2);
+            max-width: 680px;
+            margin: 0 auto 3rem;
+            font-weight: 400;
+            line-height: 1.8;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-hero-primary {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: #fff;
+            text-decoration: none;
+            padding: 0.9rem 2.2rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px -8px rgba(99, 102, 241, 0.5);
+        }
+
+        .btn-hero-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 40px -8px rgba(99, 102, 241, 0.6);
+        }
+
+        .btn-hero-ghost {
+            background: transparent;
+            color: var(--text-2);
+            text-decoration: none;
+            padding: 0.9rem 2.2rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            border: 1px solid var(--stroke);
+            transition: all 0.3s;
+        }
+
+        .btn-hero-ghost:hover {
+            border-color: var(--stroke-hover);
+            color: var(--text-1);
+        }
+
+        /* ─── DIVIDER ─── */
+        .section-divider {
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--stroke), transparent);
+        }
+
+        /* ─── WHY WE BUILT THIS ─── */
+        .why-section {
+            position: relative;
+            z-index: 1;
+            padding: 8rem 7%;
+            background: var(--bg-1);
+        }
+
+        .why-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1.1fr;
+            gap: 6rem;
+            align-items: center;
+        }
+
+        .section-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--brand);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .why-content h2 {
+            font-size: clamp(2rem, 3.5vw, 3rem);
+            line-height: 1.15;
+            margin-bottom: 1.75rem;
+        }
+
+        .why-content p {
+            color: var(--text-2);
+            font-size: 1.05rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.85;
+        }
+
+        .why-stat-group {
+            display: flex;
+            gap: 2.5rem;
+            margin-top: 2.5rem;
+        }
+
+        .why-stat h3 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-1);
+        }
+
+        .why-stat p {
+            font-size: 0.85rem;
+            color: var(--text-3);
+            margin-top: 2px;
+        }
+
+        .why-card-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .why-card {
+            background: var(--bg-2);
+            border: 1px solid var(--stroke);
+            border-radius: 16px;
+            padding: 1.75rem 2rem;
+            transition: border-color 0.3s, transform 0.3s;
+        }
+
+        .why-card:hover {
+            border-color: var(--stroke-hover);
+            transform: translateX(4px);
+        }
+
+        .why-card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .why-card h4 {
+            font-size: 1.05rem;
+            margin-bottom: 6px;
+        }
+
+        .why-card p {
+            font-size: 0.9rem;
+            color: var(--text-2);
+            line-height: 1.7;
+        }
+
+        /* ─── WHO IT'S FOR ─── */
+        .users-section {
+            position: relative;
+            z-index: 1;
+            padding: 8rem 7%;
+        }
+
+        .section-header {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto 5rem;
+        }
+
+        .section-header h2 {
+            font-size: clamp(2rem, 3vw, 2.75rem);
+            margin-bottom: 1rem;
+        }
+
+        .section-header p {
+            color: var(--text-2);
+            font-size: 1.05rem;
+        }
+
+        .user-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .user-card {
+            background: linear-gradient(160deg, var(--bg-2), var(--bg-1));
+            border: 1px solid var(--stroke);
+            border-radius: 20px;
+            padding: 2.5rem;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .user-card:hover {
+            border-color: var(--stroke-hover);
+            transform: translateY(-6px);
+            box-shadow: 0 20px 50px -15px rgba(99, 102, 241, 0.2);
+        }
+
+        .user-avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .user-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .user-card p {
+            color: var(--text-2);
+            font-size: 0.925rem;
+            line-height: 1.7;
+        }
+
+        /* ─── HOW IT WORKS ─── */
+        .how-section {
+            position: relative;
+            z-index: 1;
+            padding: 8rem 7%;
+            background: var(--bg-1);
+        }
+
+        .how-timeline {
+            max-width: 1000px;
+            margin: 5rem auto 0;
+            position: relative;
+        }
+
+        .how-timeline::before {
+            content: '';
+            position: absolute;
+            left: 50px;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: linear-gradient(to bottom, transparent, var(--stroke) 10%, var(--stroke) 90%, transparent);
+        }
+
+        .how-step {
+            display: flex;
+            gap: 3rem;
+            margin-bottom: 5rem;
+            position: relative;
+        }
+
+        .how-step-left {
+            width: 32px;
+            flex-shrink: 0;
+            margin-top: 6px;
+        }
+
+        .step-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid var(--brand);
+            background: var(--bg-0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 2;
+            margin-left: 14px;
+        }
+
+        .step-dot::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--brand);
+            border-radius: 50%;
+        }
+
+        .how-step-body {
+            background: var(--bg-2);
+            border: 1px solid var(--stroke);
+            border-radius: 20px;
+            padding: 2.5rem;
+            flex: 1;
+            transition: border-color 0.3s;
+        }
+
+        .how-step-body:hover {
+            border-color: var(--stroke-hover);
+        }
+
+        .step-phase {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--brand);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+
+        .how-step-body h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .how-step-body p {
+            color: var(--text-2);
+            font-size: 0.975rem;
+            line-height: 1.8;
+        }
+
+        .how-note {
+            margin-top: 1.5rem;
+            padding: 1rem 1.25rem;
+            background: var(--bg-3);
+            border-radius: 10px;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            font-size: 0.875rem;
+            color: var(--text-2);
+        }
+
+        .how-note i {
+            color: var(--green);
+            margin-top: 3px;
+            flex-shrink: 0;
+        }
+
+        /* ─── RESULT (image placeholder) ─── */
+        .result-section {
+            position: relative;
+            z-index: 1;
+            padding: 8rem 7%;
+            text-align: center;
+        }
+
+        .result-image-wrap {
+            max-width: 1100px;
+            margin: 4rem auto 0;
+            border-radius: 24px;
+            overflow: hidden;
+            border: 1px solid var(--stroke);
+            box-shadow: 0 0 0 1px var(--bg-2), 0 40px 100px -20px rgba(0, 0, 0, 0.6);
+            background: var(--bg-1);
+        }
+
+        .image-toolbar {
+            background: var(--bg-2);
+            padding: 0.9rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid var(--stroke);
+        }
+
+        .toolbar-dot {
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+        }
+
+        .image-placeholder-inner {
+            height: 520px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-3);
+            gap: 1rem;
+            background: repeating-linear-gradient(45deg,
+                    var(--bg-1),
+                    var(--bg-1) 10px,
+                    var(--bg-2) 10px,
+                    var(--bg-2) 20px);
+        }
+
+        .image-placeholder-inner i {
+            font-size: 3rem;
+            opacity: 0.25;
+        }
+
+        .image-placeholder-inner .img-label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--text-3);
+        }
+
+        /* ─── MODALS ─── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-box {
+            background: var(--bg-2);
+            border: 1px solid var(--stroke);
+            border-radius: 20px;
+            max-width: 720px;
+            width: 100%;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            transform: translateY(20px) scale(0.98);
+            transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .modal-overlay.open .modal-box {
+            transform: translateY(0) scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--stroke);
+            flex-shrink: 0;
+        }
+
+        .modal-header h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .modal-header .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-3);
+            font-size: 1.3rem;
+            cursor: pointer;
+            line-height: 1;
+            transition: color 0.2s;
+            padding: 4px;
+        }
+
+        .modal-header .modal-close:hover {
+            color: var(--text-1);
+        }
+
+        .modal-body {
+            padding: 2rem;
+            overflow-y: auto;
+            color: var(--text-2);
+            font-size: 0.925rem;
+            line-height: 1.85;
+        }
+
+        .modal-body h4 {
+            font-size: 1rem;
+            color: var(--text-1);
+            margin: 1.75rem 0 0.5rem;
+        }
+
+        .modal-body h4:first-child {
+            margin-top: 0;
+        }
+
+        .modal-body p {
+            margin-bottom: 1rem;
+        }
+
+        .modal-body ul {
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .modal-body ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-footer-bar {
+            padding: 1.25rem 2rem;
+            border-top: 1px solid var(--stroke);
+            display: flex;
+            justify-content: flex-end;
+            flex-shrink: 0;
+        }
+
+        /* ─── GOOGLE BTN ─── */
+        .btn-google {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            background: #fff;
+            color: #3c4043;
+            border: 1px solid #dadce0;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+            white-space: nowrap;
+        }
+
+        .btn-google:hover {
+            background: #f8f9fa;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+        }
+
+        .btn-google svg {
+            width: 17px;
+            height: 17px;
+            flex-shrink: 0;
+        }
+
+        /* ─── STICKY BOTTOM CTA BAR ─── */
+        .sticky-cta {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 998;
+            background: rgba(12, 17, 32, 0.92);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-top: 1px solid var(--stroke);
+            padding: 1rem 7%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            transform: translateY(110%);
+            opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s;
+        }
+
+        .sticky-cta.visible {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .sticky-cta-label {
+            font-size: 0.9rem;
+            color: var(--text-2);
+        }
+
+        .sticky-cta-label b {
+            color: var(--text-1);
+        }
+
+        .sticky-divider {
+            width: 1px;
+            height: 28px;
+            background: var(--stroke);
+        }
+
+        .btn-already {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-2);
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .btn-already:hover {
+            color: var(--text-1);
+            border-bottom-color: var(--text-2);
+        }
+
+        /* ─── FOOTER ─── */
+        body {
+            padding-bottom: 72px;
+        }
+
+        /* prevent sticky CTA from covering content */
+
+        footer {
+            position: relative;
+            z-index: 1;
+            background: var(--bg-1);
+            border-top: 1px solid var(--stroke);
+            padding: 5rem 7% 0;
+        }
+
+        .footer-top {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 4rem;
+            padding-bottom: 4rem;
+            border-bottom: 1px solid var(--stroke);
+        }
+
+        .footer-brand {
+            max-width: 340px;
+        }
+
+        .footer-tagline {
+            font-size: 0.875rem;
+            color: var(--text-3);
+            line-height: 1.75;
+        }
+
+        .footer-col h5 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-1);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1.25rem;
+        }
+
+        .footer-col ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .footer-col a {
+            color: var(--text-3);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .footer-col a:hover {
+            color: var(--text-1);
+        }
+
+        .footer-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 0;
+            font-size: 0.78rem;
+            color: var(--text-3);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .footer-socials {
+            display: flex;
+            gap: 1.25rem;
+        }
+
+        .footer-socials a {
+            color: var(--text-3);
+            text-decoration: none;
+            font-size: 1rem;
+            transition: color 0.2s;
+        }
+
+        .footer-socials a:hover {
+            color: var(--text-1);
+        }
+
+        /* ─── BEFORE / AFTER ─── */
+        .compare-section {
+            padding: 8rem 7%;
+        }
+
+        .compare-grid {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .compare-card {
+            border-radius: 20px;
+            padding: 2.5rem;
+            border: 1px solid var(--stroke);
+        }
+
+        .before-card {
+            background: rgba(239, 68, 68, 0.04);
+            border-color: rgba(239, 68, 68, 0.15);
+        }
+
+        .after-card {
+            background: rgba(16, 185, 129, 0.04);
+            border-color: rgba(16, 185, 129, 0.15);
+        }
+
+        .compare-tag {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .before-card .compare-tag {
+            color: #f87171;
+        }
+
+        .after-card .compare-tag {
+            color: #34d399;
+        }
+
+        .compare-card ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .compare-card li {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 0.925rem;
+            color: var(--text-2);
+            line-height: 1.5;
+        }
+
+        .before-card li i {
+            color: #f87171;
+            margin-top: 3px;
+            flex-shrink: 0;
+        }
+
+        .after-card li i {
+            color: #34d399;
+            margin-top: 3px;
+            flex-shrink: 0;
+        }
+
+        /* ─── WHAT WE SUPPORT ─── */
+        .support-section {
+            padding: 8rem 7%;
+            background: var(--bg-1);
+        }
+
+        .support-grid {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .support-card {
+            background: var(--bg-2);
+            border: 1px solid var(--stroke);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: border-color 0.3s;
+        }
+
+        .support-card:hover {
+            border-color: var(--stroke-hover);
+        }
+
+        .support-icon {
+            font-size: 1.5rem;
+            color: var(--brand);
+            margin-bottom: 1.25rem;
+        }
+
+        .support-card h4 {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            color: var(--text-1);
+        }
+
+        .support-card ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .support-card li {
+            font-size: 0.875rem;
+            color: var(--text-2);
+            padding-left: 1rem;
+            position: relative;
+        }
+
+        .support-card li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 8px;
+            width: 5px;
+            height: 5px;
+            background: var(--brand);
+            border-radius: 50%;
+        }
+
+        /* ─── FAQ ─── */
+        .faq-section {
+            padding: 8rem 7%;
+        }
+
+        .faq-list {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            border-bottom: 1px solid var(--stroke);
+        }
+
+        .faq-q {
+            width: 100%;
+            background: none;
+            border: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 0;
+            cursor: pointer;
+            color: var(--text-1);
+            text-align: left;
+            gap: 1rem;
+        }
+
+        .faq-q span {
+            font-size: 1rem;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        .faq-q i {
+            color: var(--text-3);
+            transition: transform 0.3s;
+            flex-shrink: 0;
+            font-size: 0.85rem;
+        }
+
+        .faq-q.open i {
+            transform: rotate(180deg);
+            color: var(--brand);
+        }
+
+        .faq-a {
+            display: none;
+            padding: 0 0 1.5rem;
+        }
+
+        .faq-a.open {
+            display: block;
+        }
+
+        .faq-a p {
+            color: var(--text-2);
+            font-size: 0.95rem;
+            line-height: 1.85;
+        }
+
+        /* ─── RESPONSIVE ─── */
+        @media (max-width:1024px) {
+
+            .why-inner,
+            .user-grid,
+            .support-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .compare-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .footer-top {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+        }
+
+        @media (max-width:640px) {
+            .hero {
+                padding-top: 7rem;
+            }
+
+            .how-timeline::before {
+                display: none;
+            }
+        }
+    &lt;/style&gt;
+&lt;/head&gt;
+
+&lt;body&gt;
+
+    <!-- ═══════════════ NAV ═══════════════ -->
+    &lt;nav&gt;
+        &lt;a class="logo" href="#"&gt;
+            &lt;div class="logo-icon"&gt;&lt;i class="fas fa-bolt" style="color:#fff;font-size:0.8rem;"&gt;&lt;/i&gt;&lt;/div&gt;
+            SmartBooks
+        &lt;/a&gt;
+        &lt;ul class="nav-links"&gt;
+            &lt;li&gt;&lt;a href="#why"&gt;Why We Built This&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href="#users"&gt;Who It's For&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href="#how"&gt;How It Works&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href="#result"&gt;The Output&lt;/a&gt;&lt;/li&gt;
+        &lt;/ul&gt;
+        &lt;div style="display:flex; align-items:center; gap:0.75rem;"&gt;
+            <!-- Google Sign-In button (visual only) -->
+            &lt;a href="index.html" class="btn-google"&gt;
+                <!-- Google G SVG -->
+                &lt;svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"&gt;
+                    &lt;path fill="#4285F4"
+                        d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v8.51h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.14z" /&gt;
+                    &lt;path fill="#34A853"
+                        d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" /&gt;
+                    &lt;path fill="#FBBC05"
+                        d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" /&gt;
+                    &lt;path fill="#EA4335"
+                        d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" /&gt;
+                &lt;/svg&gt;
+                Sign in with Google
+            &lt;/a&gt;
+            &lt;a href="index.html" class="btn-nav"&gt;Open Dashboard&lt;/a&gt;
+        &lt;/div&gt;
+    &lt;/nav&gt;
+
+
+    <!-- ═══════════════ HERO ═══════════════ -->
+    &lt;section class="hero"&gt;
+        &lt;div class="hero-inner"&gt;
+            &lt;div class="hero-pill"&gt;
+                &lt;span&gt;v1.0&lt;/span&gt; Now in Active Use — Audit Automation Engine
+            &lt;/div&gt;
+            &lt;h1&gt;From Raw Documents&lt;br&gt;to &lt;em&gt;Tally-Ready Reports&lt;/em&gt;&lt;br&gt;Without Typing a Word.&lt;/h1&gt;
+            &lt;p class="hero-sub"&gt;SmartBooks is a precision-built utility for audit professionals. It connects directly to
+                your Google Drive, reads your invoices and bank statements with structured intelligence, and delivers
+                clean, classified data ready for Tally ERP import.&lt;/p&gt;
+            &lt;div class="hero-actions"&gt;
+                &lt;a href="index.html" class="btn-hero-primary"&gt;Launch Dashboard &amp;rarr;&lt;/a&gt;
+                &lt;a href="#how" class="btn-hero-ghost"&gt;See How It Works&lt;/a&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/section&gt;
+
+    &lt;div class="section-divider"&gt;&lt;/div&gt;
+
+    <!-- ═══════════════ WHY ═══════════════ -->
+    &lt;section class="why-section" id="why"&gt;
+        &lt;div class="why-inner"&gt;
+            &lt;div class="why-content"&gt;
+                &lt;span class="section-label"&gt;Why We Built This&lt;/span&gt;
+                &lt;h2&gt;The audit process had a gap that nobody was solving honestly.&lt;/h2&gt;
+                &lt;p&gt;Every accounting firm we spoke to described the same problem: hundreds of scanned invoices,
+                    downloaded bank PDFs, and zero reliable way to get that data into Tally without manual entry — or
+                    paying someone to do it all day.&lt;/p&gt;
+                &lt;p&gt;We built SmartBooks to close that gap. Not with magic, but with a structured, transparent pipeline
+                    that extracts, classifies, and formats financial data with precision. You retain full control. You
+                    verify the output. We do the reading.&lt;/p&gt;
+                &lt;div class="why-stat-group"&gt;
+                    &lt;div class="why-stat"&gt;
+                        &lt;h3&gt;3–4 hrs&lt;/h3&gt;
+                        &lt;p&gt;Avg. time saved per client file&lt;/p&gt;
+                    &lt;/div&gt;
+                    &lt;div class="why-stat"&gt;
+                        &lt;h3&gt;0 edits&lt;/h3&gt;
+                        &lt;p&gt;Manual entries needed after export&lt;/p&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+
+            &lt;div class="why-card-stack"&gt;
+                &lt;div class="why-card"&gt;
+                    &lt;div class="why-card-icon" style="background:rgba(99,102,241,0.12);"&gt;
+                        &lt;i class="fas fa-file-invoice" style="color:#818cf8;"&gt;&lt;/i&gt;
+                    &lt;/div&gt;
+                    &lt;h4&gt;Invoice Extraction&lt;/h4&gt;
+                    &lt;p&gt;Reads PDFs and scanned images. Extracts vendor names, GSTINs, tax breakdowns, invoice numbers,
+                        and line items — then classifies them into Sales or Purchase registers automatically.&lt;/p&gt;
+                &lt;/div&gt;
+                &lt;div class="why-card"&gt;
+                    &lt;div class="why-card-icon" style="background:rgba(6,182,212,0.1);"&gt;
+                        &lt;i class="fas fa-building-columns" style="color:#22d3ee;"&gt;&lt;/i&gt;
+                    &lt;/div&gt;
+                    &lt;h4&gt;Bank Statement Processing&lt;/h4&gt;
+                    &lt;p&gt;Normalizes bank PDFs into structured debit/credit/balance rows — reconciled, cleaned, and ready
+                        for ledger matching. Works across multiple bank statement formats.&lt;/p&gt;
+                &lt;/div&gt;
+                &lt;div class="why-card"&gt;
+                    &lt;div class="why-card-icon" style="background:rgba(16,185,129,0.1);"&gt;
+                        &lt;i class="fas fa-circle-check" style="color:#34d399;"&gt;&lt;/i&gt;
+                    &lt;/div&gt;
+                    &lt;h4&gt;Tally Report Generation&lt;/h4&gt;
+                    &lt;p&gt;Produces an import-ready Excel or XML report mapped to Tally's sales and purchase registers. No
+                        reformatting. No column juggling. Download and import directly.&lt;/p&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/section&gt;
+
+    &lt;div class="section-divider"&gt;&lt;/div&gt;
+
+    <!-- ═══════════════ WHO IT'S FOR ═══════════════ -->
+    &lt;section class="users-section" id="users"&gt;
+        &lt;div class="section-header"&gt;
+            &lt;span class="section-label"&gt;Who Benefits&lt;/span&gt;
+            &lt;h2&gt;Built for professionals dealing with real document volume.&lt;/h2&gt;
+            &lt;p&gt;If your work involves processing financial documents at scale and reconciling them for regulatory or
+                internal reporting, SmartBooks was designed for you.&lt;/p&gt;
+        &lt;/div&gt;
+        &lt;div class="user-grid"&gt;
+            &lt;div class="user-card"&gt;
+                &lt;div class="user-avatar" style="background:rgba(99,102,241,0.12);"&gt;
+                    &lt;i class="fas fa-user-tie" style="color:#818cf8;"&gt;&lt;/i&gt;
+                &lt;/div&gt;
+                &lt;h3&gt;Chartered Accountants&lt;/h3&gt;
+                &lt;p&gt;You handle multiple client files every month. Invoice extraction across dozens of PDFs is a
+                    productivity killer. SmartBooks handles document-level extraction per client folder so you review,
+                    not transcribe.&lt;/p&gt;
+            &lt;/div&gt;
+            &lt;div class="user-card"&gt;
+                &lt;div class="user-avatar" style="background:rgba(6,182,212,0.1);"&gt;
+                    &lt;i class="fas fa-building" style="color:#22d3ee;"&gt;&lt;/i&gt;
+                &lt;/div&gt;
+                &lt;h3&gt;Audit Firms&lt;/h3&gt;
+                &lt;p&gt;Your junior staff shouldn't spend time manually typing vendor amounts. Set up SmartBooks on a shared
+                    Drive folder, trigger the automation cycle, and route structured output to your Tally operators.&lt;/p&gt;
+            &lt;/div&gt;
+            &lt;div class="user-card"&gt;
+                &lt;div class="user-avatar" style="background:rgba(245,158,11,0.1);"&gt;
+                    &lt;i class="fas fa-chart-pie" style="color:#fbbf24;"&gt;&lt;/i&gt;
+                &lt;/div&gt;
+                &lt;h3&gt;Finance Controllers&lt;/h3&gt;
+                &lt;p&gt;You need clean, classified data before month-close. SmartBooks can watch your accounts payable folder
+                    and auto-process incoming invoices continuously — so you're never catching up at month-end.&lt;/p&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/section&gt;
+
+    &lt;div class="section-divider"&gt;&lt;/div&gt;
+
+    <!-- ═══════════════ HOW IT WORKS ═══════════════ -->
+    &lt;section class="how-section" id="how"&gt;
+        &lt;div class="section-header" style="max-width:700px;"&gt;
+            &lt;span class="section-label"&gt;Functionality&lt;/span&gt;
+            &lt;h2&gt;Transparent by design. Here is exactly how your data moves.&lt;/h2&gt;
+            &lt;p&gt;We believe professional tools should show their work. Below is the explicit step-by-step process — no
+                abstractions, no vague descriptions.&lt;/p&gt;
+        &lt;/div&gt;
+
+        &lt;div class="how-timeline"&gt;
+
+            &lt;div class="how-step"&gt;
+                &lt;div class="how-step-left"&gt;
+                    &lt;div class="step-dot"&gt;&lt;/div&gt;
+                &lt;/div&gt;
+                &lt;div class="how-step-body"&gt;
+                    &lt;span class="step-phase"&gt;Phase 01&lt;/span&gt;
+                    &lt;h3&gt;Connect Google Drive — Manually Select Your Folder&lt;/h3&gt;
+                    &lt;p&gt;Open the dashboard and authorize your Google Drive account. You are then shown a folder picker
+                        where you &lt;strong&gt;manually select the specific folder&lt;/strong&gt; that contains your invoices, bank
+                        statements, or both. SmartBooks does not scan your entire Drive — it only accesses the path you
+                        explicitly authorize. This is non-negotiable for compliance reasons.&lt;/p&gt;
+                    &lt;div class="how-note"&gt;
+                        &lt;i class="fas fa-shield-halved"&gt;&lt;/i&gt;
+                        &lt;span&gt;We do not store Drive credentials. Folder selection is scoped per-session and re-confirmed
+                            each run.&lt;/span&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+
+            &lt;div class="how-step"&gt;
+                &lt;div class="how-step-left"&gt;
+                    &lt;div class="step-dot"&gt;&lt;/div&gt;
+                &lt;/div&gt;
+                &lt;div class="how-step-body"&gt;
+                    &lt;span class="step-phase"&gt;Phase 02&lt;/span&gt;
+                    &lt;h3&gt;Document Identification &amp;amp; Structural Extraction&lt;/h3&gt;
+                    &lt;p&gt;Each file is passed through a document classifier that identifies whether it is a Sales Invoice,
+                        Purchase Invoice, or Bank Statement. For invoices, a structural parser locates GSTIN fields,
+                        vendor/customer name blocks, tax breakdowns (CGST/SGST/IGST), and invoice totals — even in
+                        scanned images with uneven formatting. For bank statements, we normalize every transaction row
+                        into a standard Debit / Credit / Balance / Description format.&lt;/p&gt;
+                    &lt;div class="how-note"&gt;
+                        &lt;i class="fas fa-circle-info"&gt;&lt;/i&gt;
+                        &lt;span&gt;Fields with low confidence are flagged in the output so you can quickly review only those
+                            entries — not the entire file.&lt;/span&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+
+            &lt;div class="how-step"&gt;
+                &lt;div class="how-step-left"&gt;
+                    &lt;div class="step-dot"&gt;&lt;/div&gt;
+                &lt;/div&gt;
+                &lt;div class="how-step-body"&gt;
+                    &lt;span class="step-phase"&gt;Phase 03&lt;/span&gt;
+                    &lt;h3&gt;Start the Automation Cycle from Drive&lt;/h3&gt;
+                    &lt;p&gt;Once your folder is mapped, you initiate the &lt;strong&gt;Automation Loop&lt;/strong&gt; from the dashboard.
+                        You choose your polling interval — every 5 minutes, every 30 minutes, or hourly. The background
+                        agent monitors the source folder for new file arrivals, processes them, and deposits the
+                        structured output directly into the Output folder you specify on your Drive. You do not need to
+                        keep the app open for this to run.&lt;/p&gt;
+                    &lt;div class="how-note"&gt;
+                        &lt;i class="fas fa-rotate"&gt;&lt;/i&gt;
+                        &lt;span&gt;Only new, unprocessed files are picked up each cycle. Already-processed files are tracked
+                            to avoid duplication.&lt;/span&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+
+            &lt;div class="how-step"&gt;
+                &lt;div class="how-step-left"&gt;
+                    &lt;div class="step-dot"&gt;&lt;/div&gt;
+                &lt;/div&gt;
+                &lt;div class="how-step-body"&gt;
+                    &lt;span class="step-phase"&gt;Phase 04&lt;/span&gt;
+                    &lt;h3&gt;Verify &amp;amp; Export Tally-Ready Report&lt;/h3&gt;
+                    &lt;p&gt;After each cycle, the extraction dashboard updates with a per-file review panel. Approve or
+                        correct flagged rows. Once satisfied, click Export — and receive an Excel or XML file perfectly
+                        formatted for Tally's Sales Register, Purchase Register or Ledger import. The file is also
+                        auto-saved to your Drive output folder.&lt;/p&gt;
+                    &lt;div class="how-note"&gt;
+                        &lt;i class="fas fa-circle-check"&gt;&lt;/i&gt;
+                        &lt;span&gt;The exported report maps directly to Tally voucher fields. No column renaming, no
+                            reformatting needed before import.&lt;/span&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+
+        &lt;/div&gt;
+    &lt;/section&gt;
+
+    &lt;div class="section-divider"&gt;&lt;/div&gt;
+
+    <!-- ═══════════════ RESULT / IMAGE ═══════════════ -->
+    &lt;section class="result-section" id="result"&gt;
+        &lt;div class="section-header" style="max-width:700px;"&gt;
+            &lt;span class="section-label"&gt;The Output&lt;/span&gt;
+            &lt;h2&gt;What a completed audit cycle looks like.&lt;/h2&gt;
+            &lt;p&gt;Below is the Tally report generated at the end of an automation cycle — structured, reviewed, and ready
+                for one-click import.&lt;/p&gt;
+        &lt;/div&gt;
+
+        &lt;div class="result-image-wrap"&gt;
+            &lt;div class="image-toolbar"&gt;
+                &lt;div class="toolbar-dot" style="background:#ef4444;"&gt;&lt;/div&gt;
+                &lt;div class="toolbar-dot" style="background:#f59e0b;"&gt;&lt;/div&gt;
+                &lt;div class="toolbar-dot" style="background:#10b981;"&gt;&lt;/div&gt;
+                &lt;span style="margin-left:12px; font-size:0.78rem; color:var(--text-3);"&gt;SmartBooks — Tally Export
+                    Dashboard&lt;/span&gt;
+            &lt;/div&gt;
+            &lt;div class="image-placeholder-inner"&gt;
+                &lt;i class="fas fa-image"&gt;&lt;/i&gt;
+                &lt;div class="img-label"&gt;Place your Tally Report Screenshot here&lt;/div&gt;
+                &lt;p style="font-size:0.8rem; opacity:0.5;"&gt;(Replace this block with an &amp;lt;img&amp;gt; tag tomorrow)&lt;/p&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/section&gt;
+
+    <!-- ═══════════════ BEFORE / AFTER ═══════════════ -->
+    &lt;section class="compare-section"&gt;
+        &lt;div class="section-header"&gt;
+            &lt;span class="section-label"&gt;The Real Difference&lt;/span&gt;
+            &lt;h2&gt;Before SmartBooks. After SmartBooks.&lt;/h2&gt;
+            &lt;p&gt;This is what changes when you stop doing it manually.&lt;/p&gt;
+        &lt;/div&gt;
+        &lt;div class="compare-grid"&gt;
+            &lt;div class="compare-card before-card"&gt;
+                &lt;div class="compare-tag"&gt;&lt;i class="fas fa-times-circle"&gt;&lt;/i&gt; Without SmartBooks&lt;/div&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;i class="fas fa-times"&gt;&lt;/i&gt; Manually typing invoice data into Excel every day&lt;/li&gt;
+                    &lt;li&gt;&lt;i class="fas fa-times"&gt;&lt;/i&gt; Scrolling through 10-20page bank PDFs to match entries&lt;/li&gt;
+                    &lt;li&gt;&lt;i class="fas fa-times"&gt;&lt;/i&gt; Wrong GSTIN copied = GST filing error&lt;/li&gt;
+                    &lt;li&gt;&lt;i class="fas fa-times"&gt;&lt;/i&gt; Junior staff spending 6 hrs/day on data entry&lt;/li&gt;
+                    &lt;li&gt;&lt;i class="fas fa-times"&gt;&lt;/i&gt; Month-end chaos — all backlog piles up at once&lt;/li&gt;
+                    &lt;li&gt;&lt;i class="fas fa-times"&gt;&lt;/i&gt; Tally import fails due to formatting mismatches&lt;/li&gt;
+                &lt;/ul&gt;
+            &lt;/div&gt;
+            &lt;div class="compare-card after-card"&gt;
+                &lt;div class="compare-tag"&gt;&lt;i class="fas fa-check-circle"&gt;&lt;/i&gt; With SmartBooks&lt;/div&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;i class="fas fa-check"&gt;&lt;/i&gt; Files in Drive are read and extracted automatically&lt;/li&gt;
+                    &lt;li&gt;&lt;i class="fas fa-check"&gt;&lt;/i&gt; Bank statements normalized and reconciled in seconds&lt;/li&gt;
+                    &lt;li&gt;&lt;i class="fas fa-check"&gt;&lt;/i&gt; GSTINs extracted and validated field-by-field&lt;/li&gt;
+                    &lt;li&gt;&lt;i class="fas fa-check"&gt;&lt;/i&gt; Staff focus on review, not repetitive input&lt;/li&gt;
+                    &lt;li&gt;&lt;i class="fas fa-check"&gt;&lt;/i&gt; Continuous cycle runs — zero month-end backlog&lt;/li&gt;
+                    &lt;li&gt;&lt;i class="fas fa-check"&gt;&lt;/i&gt; Export mapped directly to Tally register fields&lt;/li&gt;
+                &lt;/ul&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/section&gt;
+
+    &lt;div class="section-divider"&gt;&lt;/div&gt;
+
+    <!-- ═══════════════ WHAT WE SUPPORT ═══════════════ -->
+    &lt;section class="support-section"&gt;
+        &lt;div class="section-header"&gt;
+            &lt;span class="section-label"&gt;Compatibility&lt;/span&gt;
+            &lt;h2&gt;What files can SmartBooks read?&lt;/h2&gt;
+            &lt;p&gt;We are honest about what we support. These are the document types our extraction pipeline currently handles reliably.&lt;/p&gt;
+        &lt;/div&gt;
+        &lt;div class="support-grid"&gt;
+            &lt;div class="support-card"&gt;
+                &lt;div class="support-icon"&gt;&lt;i class="fas fa-file-invoice"&gt;&lt;/i&gt;&lt;/div&gt;
+                &lt;h4&gt;Invoice Documents&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;PDF invoices — digital or printed-to-PDF&lt;/li&gt;
+                    &lt;li&gt;Scanned invoices saved as image files&lt;/li&gt;
+                    &lt;li&gt;GST-format invoices with GSTIN fields&lt;/li&gt;
+                    &lt;li&gt;Multi-page documents (extraction per page)&lt;/li&gt;
+                &lt;/ul&gt;
+            &lt;/div&gt;
+            &lt;div class="support-card"&gt;
+                &lt;div class="support-icon"&gt;&lt;i class="fas fa-building-columns"&gt;&lt;/i&gt;&lt;/div&gt;
+                &lt;h4&gt;Bank Statements&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Standard Indian bank statement PDFs&lt;/li&gt;
+                    &lt;li&gt;Tabular statement layouts&lt;/li&gt;
+                    &lt;li&gt;Debit, credit, balance extraction&lt;/li&gt;
+                    &lt;li&gt;Date and description normalization&lt;/li&gt;
+                &lt;/ul&gt;
+            &lt;/div&gt;
+            &lt;div class="support-card"&gt;
+                &lt;div class="support-icon"&gt;&lt;i class="fas fa-file-excel"&gt;&lt;/i&gt;&lt;/div&gt;
+                &lt;h4&gt;Output Format&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Excel (.xlsx) structured for Tally import&lt;/li&gt;
+                    &lt;li&gt;Sales Register column layout&lt;/li&gt;
+                    &lt;li&gt;Purchase Register column layout&lt;/li&gt;
+                    &lt;li&gt;Bank ledger normalized format&lt;/li&gt;
+                &lt;/ul&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/section&gt;
+
+    &lt;div class="section-divider"&gt;&lt;/div&gt;
+
+    <!-- ═══════════════ FAQ ═══════════════ -->
+    &lt;section class="faq-section"&gt;
+        &lt;div class="section-header"&gt;
+            &lt;span class="section-label"&gt;Common Questions&lt;/span&gt;
+            &lt;h2&gt;Things people ask before they start.&lt;/h2&gt;
+        &lt;/div&gt;
+        &lt;div class="faq-list"&gt;
+
+            &lt;div class="faq-item"&gt;
+                &lt;button class="faq-q" onclick="toggleFaq(this)"&gt;
+                    &lt;span&gt;Does SmartBooks access all my Google Drive files?&lt;/span&gt;
+                    &lt;i class="fas fa-chevron-down"&gt;&lt;/i&gt;
+                &lt;/button&gt;
+                &lt;div class="faq-a"&gt;
+                    &lt;p&gt;No. SmartBooks operates on a strict "Permission-First" model. You manually select the specific
+                        folder you want processed. We only read files inside that path — nothing else in your Drive is
+                        accessible to us. You can revoke access at any time from your Google account settings.&lt;/p&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+
+            &lt;div class="faq-item"&gt;
+                &lt;button class="faq-q" onclick="toggleFaq(this)"&gt;
+                    &lt;span&gt;What happens if the extraction is wrong for some fields?&lt;/span&gt;
+                    &lt;i class="fas fa-chevron-down"&gt;&lt;/i&gt;
+                &lt;/button&gt;
+                &lt;div class="faq-a"&gt;
+                    &lt;p&gt;Our system flags any field where it has low confidence in the extracted value. These are
+                        highlighted in the review dashboard so you can correct just those entries before exporting. You
+                        do not need to re-check the entire file — only the flagged rows.&lt;/p&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+
+            &lt;div class="faq-item"&gt;
+                &lt;button class="faq-q" onclick="toggleFaq(this)"&gt;
+                    &lt;span&gt;Do I need to keep the app open for automation to run?&lt;/span&gt;
+                    &lt;i class="fas fa-chevron-down"&gt;&lt;/i&gt;
+                &lt;/button&gt;
+                &lt;div class="faq-a"&gt;
+                    &lt;p&gt;No. Once you start the Automation Cycle, a background agent monitors your folder on the server
+                        side. You can close the browser and the agent will continue running, processing new files and
+                        saving output to your Drive according to the interval you set.&lt;/p&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+
+            &lt;div class="faq-item"&gt;
+                &lt;button class="faq-q" onclick="toggleFaq(this)"&gt;
+                    &lt;span&gt;Is the Tally export ready to import without changes?&lt;/span&gt;
+                    &lt;i class="fas fa-chevron-down"&gt;&lt;/i&gt;
+                &lt;/button&gt;
+                &lt;div class="faq-a"&gt;
+                    &lt;p&gt;Yes — the exported file maps directly to Tally's register field structure. Column names, date
+                        formats, and amount fields are pre-configured for Tally ERP 9 and Tally Prime. You do not need
+                        to rename columns or reformat data before importing.&lt;/p&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+
+            &lt;div class="faq-item"&gt;
+                &lt;button class="faq-q" onclick="toggleFaq(this)"&gt;
+                    &lt;span&gt;Is my financial data stored on your servers?&lt;/span&gt;
+                    &lt;i class="fas fa-chevron-down"&gt;&lt;/i&gt;
+                &lt;/button&gt;
+                &lt;div class="faq-a"&gt;
+                    &lt;p&gt;No. We do not retain copies of your documents. Files are read from your Drive, processed through
+                        the extraction pipeline, and the structured output is returned directly to your Drive. The only
+                        data we retain are minimal operational logs (file count, processing time) which are deleted
+                        after 30 days.&lt;/p&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+
+        &lt;/div&gt;
+    &lt;/section&gt;
+
+    <!-- ═══════════════ FOOTER ═══════════════ -->
+    &lt;footer&gt;
+        &lt;div class="footer-top"&gt;
+            <!-- Left: Brand -->
+            &lt;div class="footer-brand"&gt;
+                &lt;div class="logo" style="margin-bottom:1.25rem;"&gt;
+                    &lt;div class="logo-icon"&gt;&lt;i class="fas fa-bolt" style="color:#fff;font-size:0.8rem;"&gt;&lt;/i&gt;&lt;/div&gt;
+                    SmartBooks
+                &lt;/div&gt;
+                &lt;p class="footer-tagline"&gt;A precision audit automation utility for accounting professionals. Built to be
+                    transparent, accurate, and production-ready.&lt;/p&gt;
+                &lt;a href="index.html" class="btn-google"
+                    style="margin-top:1.5rem; display:inline-flex; padding:0.55rem 1rem; font-size:0.825rem;"&gt;
+                    &lt;svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" style="width:15px;height:15px;"&gt;
+                        &lt;path fill="#4285F4"
+                            d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v8.51h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.14z" /&gt;
+                        &lt;path fill="#34A853"
+                            d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" /&gt;
+                        &lt;path fill="#FBBC05"
+                            d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" /&gt;
+                        &lt;path fill="#EA4335"
+                            d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" /&gt;
+                    &lt;/svg&gt;
+                    Sign in with Google
+                &lt;/a&gt;
+            &lt;/div&gt;
+
+            <!-- Mid: Navigation -->
+            &lt;div class="footer-col"&gt;
+                &lt;h5&gt;Navigate&lt;/h5&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;a href="#why"&gt;Why We Built This&lt;/a&gt;&lt;/li&gt;
+                    &lt;li&gt;&lt;a href="#users"&gt;Who It's For&lt;/a&gt;&lt;/li&gt;
+                    &lt;li&gt;&lt;a href="#how"&gt;How It Works&lt;/a&gt;&lt;/li&gt;
+                    &lt;li&gt;&lt;a href="#result"&gt;The Output&lt;/a&gt;&lt;/li&gt;
+                    &lt;li&gt;&lt;a href="index.html"&gt;Dashboard&lt;/a&gt;&lt;/li&gt;
+                &lt;/ul&gt;
+            &lt;/div&gt;
+
+            <!-- Right: Legal -->
+            &lt;div class="footer-col"&gt;
+                &lt;h5&gt;Legal&lt;/h5&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;a href="#" onclick="openModal('privacyModal'); return false;"&gt;Privacy Policy&lt;/a&gt;&lt;/li&gt;
+                    &lt;li&gt;&lt;a href="#" onclick="openModal('termsModal'); return false;"&gt;Terms of Use&lt;/a&gt;&lt;/li&gt;
+                    &lt;li&gt;&lt;a href="https://policies.google.com/privacy" target="_blank"&gt;Google Data Policy&lt;/a&gt;&lt;/li&gt;
+                &lt;/ul&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        <!-- Bottom bar -->
+        &lt;div class="footer-bottom"&gt;
+            &lt;p&gt;&amp;copy; 2026 SmartBooks Audit Lab. All rights reserved. Not affiliated with Tally Solutions or Google LLC.
+            &lt;/p&gt;
+            &lt;div class="footer-socials"&gt;
+                &lt;a href="#" title="GitHub"&gt;&lt;i class="fab fa-github"&gt;&lt;/i&gt;&lt;/a&gt;
+                &lt;a href="#" title="LinkedIn"&gt;&lt;i class="fab fa-linkedin"&gt;&lt;/i&gt;&lt;/a&gt;
+                &lt;a href="#" title="Twitter"&gt;&lt;i class="fab fa-twitter"&gt;&lt;/i&gt;&lt;/a&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/footer&gt;
+
+    <!-- ═══════════════ PRIVACY MODAL ═══════════════ -->
+    &lt;div class="modal-overlay" id="privacyModal" onclick="closeOnBackdrop(event, 'privacyModal')"&gt;
+        &lt;div class="modal-box"&gt;
+            &lt;div class="modal-header"&gt;
+                &lt;h3&gt;Privacy Policy&lt;/h3&gt;
+                &lt;button class="modal-close" onclick="closeModal('privacyModal')"&gt;&amp;times;&lt;/button&gt;
+            &lt;/div&gt;
+            &lt;div class="modal-body"&gt;
+                &lt;p&gt;&lt;em&gt;Last updated: April 2026&lt;/em&gt;&lt;/p&gt;
+
+                &lt;h4&gt;1. What We Are&lt;/h4&gt;
+                &lt;p&gt;SmartBooks is a document processing utility that assists accounting professionals in extracting,
+                    classifying, and exporting structured data from invoices and bank statements. We are not a financial
+                    institution and do not provide financial advice.&lt;/p&gt;
+
+                &lt;h4&gt;2. Information We Access&lt;/h4&gt;
+                &lt;p&gt;SmartBooks requests access to specific Google Drive folders that &lt;strong&gt;you explicitly
+                        select&lt;/strong&gt;. We do not scan your entire Drive. The scope of access is limited to:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Reading files you authorize in the selected folder(s)&lt;/li&gt;
+                    &lt;li&gt;Writing processed output files to the output folder you specify&lt;/li&gt;
+                &lt;/ul&gt;
+                &lt;p&gt;We do not access your contacts, emails, calendar, or any Google account data beyond the Drive folders
+                    you authorize.&lt;/p&gt;
+
+                &lt;h4&gt;3. Data Processing&lt;/h4&gt;
+                &lt;p&gt;Document content (text extracted from invoices and bank statements) is processed locally or via our
+                    secure extraction pipeline. We do not sell, share, or transmit your financial document content to
+                    third parties. Extracted data is used solely to produce the structured report you request.&lt;/p&gt;
+
+                &lt;h4&gt;4. Data Retention&lt;/h4&gt;
+                &lt;p&gt;We do not store copies of your documents on our servers. Processing is ephemeral — files are read,
+                    extracted, and the output is returned to your Drive. We retain only minimal operational logs (file
+                    count, processing time) for debugging purposes, which are automatically deleted after 30 days.&lt;/p&gt;
+
+                &lt;h4&gt;5. Authentication&lt;/h4&gt;
+                &lt;p&gt;Authentication is handled exclusively through Google OAuth 2.0. We do not store your Google password
+                    or any long-lived credentials. Access tokens are session-scoped and discarded after each use.&lt;/p&gt;
+
+                &lt;h4&gt;6. Your Rights&lt;/h4&gt;
+                &lt;p&gt;You may revoke SmartBooks' access to your Google Drive at any time via your &lt;a
+                        href="https://myaccount.google.com/permissions" style="color:var(--brand);"&gt;Google Account
+                        Permissions&lt;/a&gt; page. Revoking access immediately stops all future processing.&lt;/p&gt;
+
+                &lt;h4&gt;7. Contact&lt;/h4&gt;
+                &lt;p&gt;For any privacy-related questions, contact us at the email address listed in your dashboard account
+                    settings.&lt;/p&gt;
+            &lt;/div&gt;
+            &lt;div class="modal-footer-bar"&gt;
+                &lt;button onclick="closeModal('privacyModal')" class="btn-nav"
+                    style="cursor:pointer; border:none;"&gt;Close&lt;/button&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    <!-- ═══════════════ TERMS MODAL ═══════════════ -->
+    &lt;div class="modal-overlay" id="termsModal" onclick="closeOnBackdrop(event, 'termsModal')"&gt;
+        &lt;div class="modal-box"&gt;
+            &lt;div class="modal-header"&gt;
+                &lt;h3&gt;Terms of Use&lt;/h3&gt;
+                &lt;button class="modal-close" onclick="closeModal('termsModal')"&gt;&amp;times;&lt;/button&gt;
+            &lt;/div&gt;
+            &lt;div class="modal-body"&gt;
+                &lt;p&gt;&lt;em&gt;Last updated: April 2026&lt;/em&gt;&lt;/p&gt;
+
+                &lt;h4&gt;1. Acceptance of Terms&lt;/h4&gt;
+                &lt;p&gt;By accessing or using SmartBooks, you agree to be bound by these Terms of Use. If you do not agree,
+                    you may not use the platform.&lt;/p&gt;
+
+                &lt;h4&gt;2. Permitted Use&lt;/h4&gt;
+                &lt;p&gt;SmartBooks is designed for legitimate accounting, auditing, and financial data management purposes.
+                    You may use SmartBooks to:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Process your own business invoices and bank statements&lt;/li&gt;
+                    &lt;li&gt;Process client documents for which you are the authorized accountant or auditor&lt;/li&gt;
+                    &lt;li&gt;Generate Tally-compatible export reports for import into your own ERP system&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;3. Prohibited Use&lt;/h4&gt;
+                &lt;p&gt;You may not use SmartBooks to process documents without explicit authorization from the document
+                    owner. You may not reverse-engineer, resell, or sublicense any part of this platform. You may not
+                    upload documents containing fabricated or fraudulent financial data.&lt;/p&gt;
+
+                &lt;h4&gt;4. Accuracy Disclaimer&lt;/h4&gt;
+                &lt;p&gt;SmartBooks uses automated extraction logic that achieves high accuracy under normal conditions.
+                    However, extracted data should be reviewed before import into accounting systems. SmartBooks is a
+                    tool, not an auditor. Final responsibility for the accuracy of submitted financial records rests
+                    with the user.&lt;/p&gt;
+
+                &lt;h4&gt;5. Google Drive Integration&lt;/h4&gt;
+                &lt;p&gt;SmartBooks integrates with Google Drive via Google's OAuth 2.0 API. Your use of this integration is
+                    also subject to &lt;a href="https://policies.google.com/terms" target="_blank"
+                        style="color:var(--brand);"&gt;Google's Terms of Service&lt;/a&gt;. SmartBooks is not affiliated with or
+                    endorsed by Google LLC.&lt;/p&gt;
+
+                &lt;h4&gt;6. Limitation of Liability&lt;/h4&gt;
+                &lt;p&gt;SmartBooks is provided "as is" without warranties of any kind. We are not liable for any financial
+                    loss, regulatory penalty, or data inaccuracy arising from use of this tool. Maximum liability is
+                    limited to the amount paid for the service in the last 12 months.&lt;/p&gt;
+
+                &lt;h4&gt;7. Changes to Terms&lt;/h4&gt;
+                &lt;p&gt;We reserve the right to update these terms with reasonable notice. Continued use of SmartBooks after
+                    changes are posted constitutes acceptance of the revised terms.&lt;/p&gt;
+            &lt;/div&gt;
+            &lt;div class="modal-footer-bar"&gt;
+                &lt;button onclick="closeModal('termsModal')" class="btn-nav" style="cursor:pointer; border:none;"&gt;I
+                    Understand&lt;/button&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    <!-- ═══════════════ STICKY BOTTOM CTA BAR ═══════════════ -->
+    &lt;div class="sticky-cta" id="stickyCta"&gt;
+        &lt;span class="sticky-cta-label"&gt;Ready to automate your audit workflow?&lt;/span&gt;
+        &lt;a href="index.html" class="btn-google" style="padding:0.6rem 1.25rem; font-size:0.875rem;"&gt;
+            <!-- Google G SVG -->
+            &lt;svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" style="width:16px;height:16px;"&gt;
+                &lt;path fill="#4285F4"
+                    d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v8.51h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.14z" /&gt;
+                &lt;path fill="#34A853"
+                    d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" /&gt;
+                &lt;path fill="#FBBC05"
+                    d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" /&gt;
+                &lt;path fill="#EA4335"
+                    d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" /&gt;
+            &lt;/svg&gt;
+            Sign in with Google
+        &lt;/a&gt;
+        &lt;div class="sticky-divider"&gt;&lt;/div&gt;
+        &lt;a href="index.html" class="btn-already"&gt;Already have an account? &amp;rarr;&lt;/a&gt;
+    &lt;/div&gt;
+
+    &lt;script&gt;
+        // ── Active nav highlight on scroll
+        const sections = document.querySelectorAll('section[id]');
+        const navLinks = document.querySelectorAll('.nav-links a');
+        const stickyCta = document.getElementById('stickyCta');
+        const heroHeight = document.querySelector('.hero').offsetHeight;
+
+        window.addEventListener('scroll', () =&gt; {
+            const scrollY = window.scrollY;
+
+            let current = '';
+            sections.forEach(s =&gt; {
+                if (scrollY &gt;= s.offsetTop - 120) current = s.id;
             });
+            navLinks.forEach(a =&gt; {
+                a.style.color = a.getAttribute('href') === `#${current}` ? '#f1f5f9' : '';
+            });
+
+            if (scrollY &gt; heroHeight * 0.6) {
+                stickyCta.classList.add('visible');
+            } else {
+                stickyCta.classList.remove('remove');
+            }
+        });
+
+        // ── Modal helpers
+        function openModal(id) {
+            document.getElementById(id).classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        function closeOnBackdrop(e, id) {
+            if (e.target === document.getElementById(id)) closeModal(id);
+        }
+
+        document.addEventListener('keydown', e =&gt; {
+            if (e.key === 'Escape') {
+                ['privacyModal', 'termsModal'].forEach(closeModal);
+            }
+        });
+
+        // ── FAQ accordion
+        function toggleFaq(btn) {
+            const answer = btn.nextElementSibling;
+            const isOpen = btn.classList.contains('open');
+
+            // Close all
+            document.querySelectorAll('.faq-q').forEach(b =&gt; b.classList.remove('open'));
+            document.querySelectorAll('.faq-a').forEach(a =&gt; a.classList.remove('open'));
+
+            // Open clicked if it was closed
+            if (!isOpen) {
+                btn.classList.add('open');
+                answer.classList.add('open');
+            }
+        }
+    &lt;/script&gt;
+
+&lt;/body&gt;
+
+&lt;/html&gt;</code></pre>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script>
+        async function copyCode(elementId, btn) {
+            const code = document.getElementById(elementId).innerText;
+            try {
+                await navigator.clipboard.writeText(code);
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                btn.style.background = '#22c55e';
+                btn.style.color = '#fff';
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.style.background = 'rgba(56, 189, 248, 0.1)';
+                    btn.style.color = 'var(--bg-accent)';
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy!', err);
+            }
         }
     </script>
 </body>
