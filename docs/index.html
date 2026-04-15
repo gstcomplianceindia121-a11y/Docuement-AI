@@ -180,6 +180,9 @@
                 <li class="nav-item" id="nav-landing_1" onclick="switchTab('landing_1')">
                     <i class="far fa-file-code"></i> landing_1.html
                 </li>
+                <li class="nav-item" id="nav-change" onclick="switchTab('change')">
+                    <i class="far fa-file-code"></i> change.html
+                </li>
             </ul>
         </aside>
 
@@ -4566,6 +4569,62 @@
 
 &lt;/body&gt;
 
+&lt;/html&gt;</code></pre>
+                </div>
+            </div>
+
+            <!-- View for change.html -->
+            <div id="view-change" class="content-view">
+                <header class="header">
+                    <h2>change.html <span style="font-weight: 400; opacity: 0.5; font-size: 0.9rem; margin-left: 8px;">/ Modification Log</span></h2>
+                    <button class="btn-copy" onclick="copyCode('change-code', this)">
+                        <i class="far fa-copy"></i> Copy code
+                    </button>
+                </header>
+                <div class="code-container">
+                    <pre><code class="language-html" id="change-code">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot;&gt;
+    &lt;title&gt;Bug Fix Summary — landing.html&lt;/title&gt;
+    &lt;style&gt;
+        body { font-family: sans-serif; line-height: 1.6; padding: 2rem; color: #333; max-width: 800px; margin: 0 auto; }
+        h1 { color: #4f46e5; border-bottom: 2px solid #eee; padding-bottom: 0.5rem; }
+        .change-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; margin-top: 1.5rem; }
+        code { background: #eee; padding: 2px 4px; border-radius: 4px; font-family: monospace; }
+        .line-num { font-weight: bold; color: #666; margin-right: 10px; }
+        .diff { font-family: monospace; white-space: pre-wrap; background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 6px; margin-top: 10px; }
+        .added { color: #4ade80; }
+        .removed { color: #f87171; }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;landing.html Modification Log&lt;/h1&gt;
+    &lt;p&gt;The following changes were implemented to fix the navigation highlight issue for the &lt;strong&gt;Bank Pipeline&lt;/strong&gt; section.&lt;/p&gt;
+
+    &lt;div class=&quot;change-card&quot;&gt;
+        &lt;h3&gt;1. Selector Update (Previously around Line 2101)&lt;/h3&gt;
+        &lt;p&gt;Changed the generic &lt;code&gt;section[id]&lt;/code&gt; selector to an explicit list. This fixed the bug where the &quot;Bank Pipeline&quot; section (which uses a &lt;code&gt;&amp;lt;div&amp;gt;&lt;/code&gt; tag) was being ignored by the scroll highlighter.&lt;/p&gt;
+        &lt;div class=&quot;diff&quot;&gt;
+&lt;span class=&quot;removed&quot;&gt;- const sections = document.querySelectorAll(&#x27;section[id]&#x27;);&lt;/span&gt;
+&lt;span class=&quot;added&quot;&gt;+ const sections = document.querySelectorAll(&#x27;#why, #users, #how, #bank-pipeline, #result&#x27;);&lt;/span&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class=&quot;change-card&quot;&gt;
+        &lt;h3&gt;2. Offset Calculation Fix (Previously around Line 2111)&lt;/h3&gt;
+        &lt;p&gt;Replaced &lt;code&gt;offsetTop&lt;/code&gt; with a document-absolute calculation. Because &lt;code&gt;#bank-pipeline&lt;/code&gt; is nested inside the &lt;code&gt;#how&lt;/code&gt; section, &lt;code&gt;offsetTop&lt;/code&gt; was returning a value relative to the parent section, causing incorrect scroll detection. The new logic uses the viewport-relative position plus scroll offset.&lt;/p&gt;
+        &lt;div class=&quot;diff&quot;&gt;
+&lt;span class=&quot;removed&quot;&gt;- if (scrollY &gt;= s.offsetTop - 120) current = s.id;&lt;/span&gt;
+&lt;span class=&quot;added&quot;&gt;+ const sectionTop = s.getBoundingClientRect().top + scrollY;&lt;/span&gt;
+&lt;span class=&quot;added&quot;&gt;+ if (scrollY &gt;= sectionTop - 150) current = s.id;&lt;/span&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div style=&quot;margin-top: 3rem; font-size: 0.8rem; color: #999; text-align: center;&quot;&gt;
+        Log generated on April 15, 2026
+    &lt;/div&gt;
+&lt;/body&gt;
 &lt;/html&gt;</code></pre>
                 </div>
             </div>
